@@ -12,6 +12,7 @@ export class PreviewPanel {
   private readonly onDisposeEmitter = new vscode.EventEmitter<vscode.Uri>();
   public readonly onDispose = this.onDisposeEmitter.event;
   private isScrollingFromPreview = false;
+  private scrollFromPreviewTimer: ReturnType<typeof setTimeout> | undefined;
   private isDisposed = false;
   private isDirty = false;
 
@@ -114,6 +115,7 @@ export class PreviewPanel {
     if (this.isDisposed) return;
     this.isDisposed = true;
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    if (this.scrollFromPreviewTimer) clearTimeout(this.scrollFromPreviewTimer);
     this.onDisposeEmitter.fire(this.document.uri);
     this.onDisposeEmitter.dispose();
     for (const d of this.disposables) d.dispose();
@@ -134,6 +136,7 @@ export class PreviewPanel {
     if (!editor) return;
 
     this.isScrollingFromPreview = true;
+    if (this.scrollFromPreviewTimer) clearTimeout(this.scrollFromPreviewTimer);
     const targetLine = Math.min(
       Math.floor(ratio * (this.document.lineCount - 1)),
       this.document.lineCount - 1
@@ -141,7 +144,7 @@ export class PreviewPanel {
     const range = new vscode.Range(targetLine, 0, targetLine, 0);
     editor.revealRange(range, vscode.TextEditorRevealType.AtTop);
 
-    setTimeout(() => { this.isScrollingFromPreview = false; }, 200);
+    this.scrollFromPreviewTimer = setTimeout(() => { this.isScrollingFromPreview = false; }, 200);
   }
 
   private scheduleUpdate(): void {
