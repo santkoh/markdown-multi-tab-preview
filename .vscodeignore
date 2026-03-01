@@ -1,0 +1,12 @@
+src/**
+docs/**
+.vscode/**
+.claude/**
+tsconfig.json
+tsconfig.webview.json
+esbuild.js
+.gitignore
+node_modules/**
+*.vsix
+.DS_Store
+pnpm-lock.yaml
