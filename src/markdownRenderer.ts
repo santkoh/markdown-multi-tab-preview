@@ -49,8 +49,14 @@ export function renderMarkdown(
         let resolvedHref = href;
         // Resolve relative paths only — skip absolute URLs (any scheme) and protocol-relative URLs (//)
         if (href && !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(href)) {
-          const absUri = vscode.Uri.joinPath(docDir, href);
-          resolvedHref = webview.asWebviewUri(absUri).toString();
+          // Separate path from query/fragment before resolving with joinPath
+          const qIdx = href.indexOf('?');
+          const hIdx = href.indexOf('#');
+          const splitIdx = qIdx >= 0 && hIdx >= 0 ? Math.min(qIdx, hIdx) : qIdx >= 0 ? qIdx : hIdx;
+          const pathPart = splitIdx >= 0 ? href.slice(0, splitIdx) : href;
+          const suffix = splitIdx >= 0 ? href.slice(splitIdx) : '';
+          const absUri = vscode.Uri.joinPath(docDir, pathPart);
+          resolvedHref = webview.asWebviewUri(absUri).toString() + suffix;
         }
         const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
         const altText = text ? escapeHtml(text) : '';
