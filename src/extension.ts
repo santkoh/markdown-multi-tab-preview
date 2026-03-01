@@ -45,11 +45,15 @@ export function activate(context: vscode.ExtensionContext): void {
   // Toggle command for keyboard shortcut (works from both contexts)
   context.subscriptions.push(
     vscode.commands.registerCommand('mdMultiTabPreview.togglePreview', () => {
+      // If a preview panel is currently active, switch to editor
+      if (previewManager.hasActivePreview()) {
+        previewManager.showEditorForActivePreview();
+        return;
+      }
+      // Otherwise, if a markdown editor is active, open/reveal its preview
       const editor = vscode.window.activeTextEditor;
       if (editor && editor.document.languageId === 'markdown') {
-        previewManager.togglePreview(editor.document);
-      } else {
-        previewManager.showEditorForActivePreview();
+        previewManager.openPreview(editor.document);
       }
     })
   );
