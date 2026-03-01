@@ -1,5 +1,6 @@
 import mermaid from 'mermaid';
 import hljs from 'highlight.js';
+import DOMPurify from 'dompurify';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: unknown): void;
@@ -19,7 +20,7 @@ function getTheme(): 'dark' | 'default' {
 mermaid.initialize({
   startOnLoad: false,
   theme: getTheme(),
-  securityLevel: 'loose',
+  securityLevel: 'strict',
 });
 
 let mermaidCounter = 0;
@@ -35,7 +36,9 @@ async function applyMermaid(): Promise<void> {
       const { svg } = await mermaid.render(id, source);
       const container = document.createElement('div');
       container.className = 'mermaid-diagram';
-      container.innerHTML = svg;
+      container.innerHTML = DOMPurify.sanitize(svg, {
+        USE_PROFILES: { svg: true, svgFilters: true },
+      });
       el.replaceWith(container);
     } catch (err) {
       const errorDiv = document.createElement('div');
@@ -152,13 +155,13 @@ window.addEventListener('message', async (event) => {
   switch (message.type) {
     case 'update': {
       if (content) {
-        content.innerHTML = message.html;
+        content.innerHTML = DOMPurify.sanitize(message.html);
       }
       // Re-initialize mermaid with current theme
       mermaid.initialize({
         startOnLoad: false,
         theme: getTheme(),
-        securityLevel: 'loose',
+        securityLevel: 'strict',
       });
       await applyMermaid();
       applyHighlight();

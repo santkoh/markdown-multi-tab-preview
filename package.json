@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/santkoh/markdown-multi-tab-preview#readme",
   "icon": "media/icon.png",
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "onLanguage:markdown"
   ],
@@ -87,6 +89,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "dompurify": "^3.3.1",
     "highlight.js": "^11.11.1",
     "marked": "^17.0.3",
     "mermaid": "^11.12.3"
