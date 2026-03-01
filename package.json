@@ -75,6 +75,11 @@
           "type": "boolean",
           "default": true,
           "description": ".mdファイルを開いた時にプレビューを自動表示"
+        },
+        "mdMultiTabPreview.retainContextWhenHidden": {
+          "type": "boolean",
+          "default": true,
+          "description": "非表示時もプレビューの状態を保持する（無効にするとメモリ使用量が減少しますが、タブ切り替え時に再レンダリングが発生します）"
         }
       }
     }

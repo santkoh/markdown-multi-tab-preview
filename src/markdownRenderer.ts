@@ -1,6 +1,5 @@
 import { Marked, Tokens } from 'marked';
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { escapeHtml } from './utils';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
@@ -60,5 +59,5 @@ export function renderMarkdown(
   });
 
   const frontmatterHtml = frontmatter ? renderFrontmatterHtml(frontmatter) : '';
-  return frontmatterHtml + (marked.parse(body) as string);
+  return frontmatterHtml + (marked.parse(body, { async: false }) as string);
 }

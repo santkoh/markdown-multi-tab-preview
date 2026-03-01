@@ -15,6 +15,7 @@ export class PreviewManager {
     const existing = this.panels.get(key);
     if (existing) {
       existing.reveal(viewColumn);
+      this.lastActivePreviewUri = key;
       return;
     }
 
@@ -51,7 +52,9 @@ export class PreviewManager {
 
     if (targetUri) {
       const uri = vscode.Uri.parse(targetUri);
-      vscode.window.showTextDocument(uri, { preview: false });
+      void vscode.window.showTextDocument(uri, { preview: false }).then(undefined, (err) => {
+        console.warn('Failed to open editor:', err);
+      });
     }
   }
 

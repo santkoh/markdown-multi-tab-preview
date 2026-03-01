@@ -124,9 +124,10 @@ function scrollToLine(line: number, totalLines: number): void {
   clearTimeout(scrollFromEditorTimer);
   scrollFromEditorTimer = setTimeout(() => { isScrollingFromEditor = false; }, 200);
 
-  const ratio = line / totalLines;
-  const scrollTarget = ratio * document.body.scrollHeight;
-  window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+  const ratio = totalLines > 1 ? line / (totalLines - 1) : 0;
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  const scrollTarget = ratio * maxScroll;
+  window.scrollTo({ top: scrollTarget, behavior: 'instant' });
 }
 
 // Preview → Editor scroll sync
@@ -150,12 +151,18 @@ function escapeForHtml(text: string): string {
 
 const content = document.getElementById('content');
 
+let renderVersion = 0;
+
 window.addEventListener('message', async (event) => {
+  if (!event.data || typeof event.data !== 'object') return;
   const message = event.data;
   switch (message.type) {
     case 'update': {
+      const currentVersion = ++renderVersion;
       if (content) {
-        content.innerHTML = DOMPurify.sanitize(message.html);
+        content.innerHTML = DOMPurify.sanitize(message.html, {
+          FORBID_TAGS: ['form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+        });
       }
       // Re-initialize mermaid with current theme
       mermaid.initialize({
@@ -164,6 +171,7 @@ window.addEventListener('message', async (event) => {
         securityLevel: 'strict',
       });
       await applyMermaid();
+      if (currentVersion !== renderVersion) break;
       applyHighlight();
       applyCopyButtons();
       break;
@@ -174,3 +182,5 @@ window.addEventListener('message', async (event) => {
     }
   }
 });
+
+vscode.postMessage({ type: 'ready' });
