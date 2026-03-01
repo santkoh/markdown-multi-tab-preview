@@ -39,10 +39,26 @@ export function renderMarkdown(
 
       code({ text, lang }: Tokens.Code): string {
         if (lang === 'mermaid') {
-          return `<div class="mermaid-source" data-mermaid="${escapeHtml(text)}"></div>\n`;
+          const encoded = Buffer.from(text).toString('base64');
+          return `<div class="mermaid-source" data-mermaid="${encoded}"></div>\n`;
         }
         const langClass = lang ? ` class="language-${escapeHtml(lang)}"` : '';
         return `<pre><code${langClass}>${escapeHtml(text)}</code></pre>\n`;
+      },
+
+      checkbox({ checked }: Tokens.Checkbox): string {
+        const icon = checked ? '\u2611' : '\u2610';
+        const cls = checked ? 'task-checkbox task-checkbox-checked' : 'task-checkbox';
+        return `<span class="${cls}">${icon}</span>`;
+      },
+
+      listitem(token: Tokens.ListItem): string {
+        let body = this.parser.parse(token.tokens);
+        if (token.task) {
+          body = `<span class="task-list-item-content">${body}</span>`;
+          return `<li class="task-list-item">${body}</li>\n`;
+        }
+        return `<li>${body}</li>\n`;
       },
 
       image({ href, title, text }: Tokens.Image): string {

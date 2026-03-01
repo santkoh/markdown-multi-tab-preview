@@ -36,6 +36,12 @@ Here is some `inline code` in a sentence.
 2. Second
 3. Third
 
+### Task List
+
+- [x] Completed task
+- [ ] Incomplete task
+- [x] Another done item
+
 ## Blockquote
 
 > This is a blockquote.
