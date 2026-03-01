@@ -4,12 +4,14 @@ import { escapeHtml } from './utils';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
-function extractFrontmatter(markdown: string): { frontmatter: string | null; body: string } {
+function extractFrontmatter(markdown: string): { frontmatter: string | null; body: string; bodyStartLine: number } {
   const match = markdown.match(FRONTMATTER_RE);
-  if (!match) return { frontmatter: null, body: markdown };
+  if (!match) return { frontmatter: null, body: markdown, bodyStartLine: 0 };
+  const frontmatterLines = (match[0].match(/\n/g) ?? []).length;
   return {
     frontmatter: match[1],
     body: markdown.slice(match[0].length),
+    bodyStartLine: frontmatterLines,
   };
 }
 
@@ -26,24 +28,81 @@ export function renderMarkdown(
   documentUri: vscode.Uri
 ): string {
   const docDir = vscode.Uri.joinPath(documentUri, '..');
-  const { frontmatter, body } = extractFrontmatter(markdown);
+  const { frontmatter, body, bodyStartLine } = extractFrontmatter(markdown);
+
+  const tokenLineMap = new WeakMap<object, number>();
 
   const marked = new Marked({
     gfm: true,
     renderer: {
-      heading({ tokens, depth }: Tokens.Heading): string {
-        const text = this.parser.parseInline(tokens);
-        const prefix = '#'.repeat(depth);
-        return `<h${depth}><span class="heading-prefix">${prefix}</span> ${text}</h${depth}>\n`;
+      heading(token: Tokens.Heading): string {
+        const line = tokenLineMap.get(token) ?? '';
+        const text = this.parser.parseInline(token.tokens);
+        const prefix = '#'.repeat(token.depth);
+        return `<h${token.depth} data-line="${line}"><span class="heading-prefix">${prefix}</span> ${text}</h${token.depth}>\n`;
       },
 
-      code({ text, lang }: Tokens.Code): string {
-        if (lang === 'mermaid') {
-          const encoded = Buffer.from(text).toString('base64');
-          return `<div class="mermaid-source" data-mermaid="${encoded}"></div>\n`;
+      code(token: Tokens.Code): string {
+        const line = tokenLineMap.get(token) ?? '';
+        if (token.lang === 'mermaid') {
+          const encoded = Buffer.from(token.text).toString('base64');
+          return `<div class="mermaid-source" data-line="${line}" data-mermaid="${encoded}"></div>\n`;
         }
-        const langClass = lang ? ` class="language-${escapeHtml(lang)}"` : '';
-        return `<pre><code${langClass}>${escapeHtml(text)}</code></pre>\n`;
+        const langClass = token.lang ? ` class="language-${escapeHtml(token.lang)}"` : '';
+        return `<pre data-line="${line}"><code${langClass}>${escapeHtml(token.text)}</code></pre>\n`;
+      },
+
+      paragraph(token: Tokens.Paragraph): string {
+        const line = tokenLineMap.get(token) ?? '';
+        return `<p data-line="${line}">${this.parser.parseInline(token.tokens)}</p>\n`;
+      },
+
+      list(token: Tokens.List): string {
+        const line = tokenLineMap.get(token) ?? '';
+        const tag = token.ordered ? 'ol' : 'ul';
+        const startAttr = token.ordered && token.start !== 1 ? ` start="${token.start}"` : '';
+        let body = '';
+        for (const item of token.items) {
+          body += this.listitem(item);
+        }
+        return `<${tag}${startAttr} data-line="${line}">${body}</${tag}>\n`;
+      },
+
+      table(token: Tokens.Table): string {
+        const line = tokenLineMap.get(token) ?? '';
+        let header = '<tr>';
+        for (let i = 0; i < token.header.length; i++) {
+          const cell = token.header[i];
+          const align = token.align[i];
+          const alignAttr = align ? ` align="${align}"` : '';
+          header += `<th${alignAttr}>${this.parser.parseInline(cell.tokens)}</th>`;
+        }
+        header += '</tr>';
+
+        let body = '';
+        for (const row of token.rows) {
+          body += '<tr>';
+          for (let i = 0; i < row.length; i++) {
+            const cell = row[i];
+            const align = token.align[i];
+            const alignAttr = align ? ` align="${align}"` : '';
+            body += `<td${alignAttr}>${this.parser.parseInline(cell.tokens)}</td>`;
+          }
+          body += '</tr>';
+        }
+
+        return `<table data-line="${line}"><thead>${header}</thead><tbody>${body}</tbody></table>\n`;
+      },
+
+      blockquote(token: Tokens.Blockquote): string {
+        const line = tokenLineMap.get(token) ?? '';
+        const body = this.parser.parse(token.tokens);
+        return `<blockquote data-line="${line}">${body}</blockquote>\n`;
+      },
+
+      hr(token: Tokens.Hr): string {
+        const line = tokenLineMap.get(token) ?? '';
+        return `<hr data-line="${line}" />\n`;
       },
 
       checkbox({ checked }: Tokens.Checkbox): string {
@@ -81,6 +140,18 @@ export function renderMarkdown(
     },
   });
 
+  // Two-phase rendering: lexer → build line map → parser
+  const tokens = marked.lexer(body);
+
+  let cumLine = bodyStartLine;
+  for (const token of tokens) {
+    tokenLineMap.set(token, cumLine);
+    const newlines = (token.raw.match(/\n/g) ?? []).length;
+    cumLine += newlines;
+  }
+
+  const bodyHtml = marked.parser(tokens) as string;
+
   const frontmatterHtml = frontmatter ? renderFrontmatterHtml(frontmatter) : '';
-  return frontmatterHtml + (marked.parse(body, { async: false }) as string);
+  return frontmatterHtml + bodyHtml;
 }

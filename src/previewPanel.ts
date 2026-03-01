@@ -94,8 +94,8 @@ export class PreviewPanel {
     this.panel.webview.onDidReceiveMessage((message) => {
       if (message.type === 'ready') {
         this.update();
-      } else if (message.type === 'scrollEditor' && typeof message.ratio === 'number') {
-        this.scrollEditorToRatio(message.ratio);
+      } else if (message.type === 'scrollEditor' && typeof message.line === 'number') {
+        this.scrollEditorToLine(message.line);
       }
     }, null, this.disposables);
 
@@ -122,9 +122,8 @@ export class PreviewPanel {
     this.disposables = [];
   }
 
-  private scrollEditorToRatio(ratio: number): void {
-    if (!Number.isFinite(ratio)) return;
-    ratio = Math.max(0, Math.min(1, ratio));
+  private scrollEditorToLine(line: number): void {
+    if (!Number.isFinite(line) || line < 0) return;
 
     const uriStr = this.document.uri.toString();
     const active = vscode.window.activeTextEditor;
@@ -137,10 +136,7 @@ export class PreviewPanel {
 
     this.isScrollingFromPreview = true;
     if (this.scrollFromPreviewTimer) clearTimeout(this.scrollFromPreviewTimer);
-    const targetLine = Math.min(
-      Math.floor(ratio * (this.document.lineCount - 1)),
-      this.document.lineCount - 1
-    );
+    const targetLine = Math.min(Math.floor(line), this.document.lineCount - 1);
     const range = new vscode.Range(targetLine, 0, targetLine, 0);
     editor.revealRange(range, vscode.TextEditorRevealType.AtTop);
 
