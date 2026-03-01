@@ -8,5 +8,6 @@ esbuild.js
 .gitignore
 node_modules/**
 *.vsix
+**/*.map
 .DS_Store
 pnpm-lock.yaml
