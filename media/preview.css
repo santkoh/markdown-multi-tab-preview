@@ -84,11 +84,56 @@ li { margin: 0.25em 0; }
 
 /* Blockquote */
 blockquote {
-  border-left: 4px solid var(--vscode-textBlockQuote-border);
-  background: var(--vscode-textBlockQuote-background);
-  padding: 8px 16px;
-  margin: 8px 0;
+  position: relative;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  padding: 4px 14px;
+  margin: 6px 0;
   color: var(--vscode-foreground);
+}
+
+blockquote::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: var(--vscode-textBlockQuote-border);
+  border-radius: 2px;
+}
+
+body.vscode-light blockquote {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+body.vscode-dark blockquote {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+body.vscode-high-contrast blockquote {
+  background: transparent;
+}
+
+/* Nested blockquote */
+blockquote blockquote {
+  margin: 4px 0;
+  padding: 2px 12px;
+}
+
+body.vscode-light blockquote blockquote,
+body.vscode-dark blockquote blockquote,
+body.vscode-high-contrast blockquote blockquote {
+  background: transparent;
+}
+
+blockquote blockquote::before {
+  width: 2px;
+  opacity: 0.5;
+}
+
+blockquote blockquote blockquote::before {
+  opacity: 0.3;
 }
 
 /* Horizontal rule */
@@ -116,11 +161,20 @@ th {
 
 /* Inline code */
 code {
-  font-family: var(--vscode-editor-fontFamily, "Consolas", "Courier New", monospace);
+  font-family:
+    var(--vscode-editor-fontFamily),
+    "Cascadia Code",
+    "JetBrains Mono",
+    "Fira Code",
+    "Source Code Pro",
+    Menlo,
+    Consolas,
+    "Courier New",
+    monospace;
   font-size: 0.9em;
   background: var(--vscode-textCodeBlock-background);
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 4px;
 }
 
 /* Code blocks */
@@ -149,7 +203,7 @@ pre code {
   color: var(--vscode-descriptionForeground);
   background: var(--vscode-editor-background);
   border: 1px solid var(--vscode-panel-border);
-  border-radius: 3px;
+  border-radius: 4px;
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.15s;
@@ -179,12 +233,83 @@ img {
 .mermaid-diagram {
   text-align: center;
   margin: 16px 0;
-  overflow-x: auto;
+  overflow: hidden;
+  position: relative;
 }
 
 .mermaid-diagram svg {
   max-width: 100%;
   height: auto;
+}
+
+.mermaid-panzoom-wrapper {
+  /* cursor is set via .mermaid-zoom-active when mode is ON */
+}
+
+/* Mode ON: grab cursor */
+.mermaid-zoom-active .mermaid-panzoom-wrapper {
+  cursor: grab;
+}
+.mermaid-zoom-active .mermaid-panzoom-wrapper:active {
+  cursor: grabbing;
+}
+
+/* Mode ON: outline border */
+.mermaid-zoom-active {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: -2px;
+  border-radius: 4px;
+}
+
+/* Mode ON: toolbar always visible */
+.mermaid-zoom-active .mermaid-toolbar {
+  opacity: 1;
+}
+
+/* Toggle button active state */
+.mermaid-btn-active {
+  background: var(--vscode-toolbar-hoverBackground);
+  border-color: var(--vscode-focusBorder);
+}
+
+/* Mermaid toolbar */
+.mermaid-toolbar {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  gap: 3px;
+  z-index: 10;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.mermaid-diagram:hover .mermaid-toolbar {
+  opacity: 1;
+}
+
+.mermaid-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 3px;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.mermaid-btn svg {
+  width: 12px;
+  height: 12px;
+}
+
+.mermaid-btn:hover {
+  background: var(--vscode-toolbar-hoverBackground);
 }
 
 /* Mermaid error */
