@@ -22,6 +22,7 @@ mermaid.initialize({
   startOnLoad: false,
   theme: getTheme(),
   securityLevel: 'loose',
+  fontFamily: '"trebuchet ms", verdana, arial, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif',
 });
 
 const panzoomCleanups: (() => void)[] = [];
@@ -158,7 +159,9 @@ async function applyMermaid(): Promise<void> {
   for (const el of elements) {
     const encoded = el.getAttribute('data-mermaid');
     if (!encoded) continue;
-    const source = atob(encoded);
+    const source = new TextDecoder().decode(
+      Uint8Array.from(atob(encoded), c => c.charCodeAt(0))
+    );
 
     const id = `mermaid-${mermaidCounter++}`;
     try {
@@ -251,27 +254,82 @@ function applyCopyButtons(): void {
 let isScrollingFromEditor = false;
 let scrollFromEditorTimer: ReturnType<typeof setTimeout> | undefined;
 
-function scrollToLine(line: number, totalLines: number): void {
-  if (totalLines <= 0) return;
+// Mermaid async rendering coordination
+let pendingScrollLine: number | null = null;
+let isMermaidRendering = false;
+
+function applyScrollIfReady(): void {
+  if (isMermaidRendering || pendingScrollLine === null) return;
+  executeScroll(pendingScrollLine);
+  pendingScrollLine = null;
+}
+
+function executeScroll(line: number): void {
+  const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-line]'));
+  if (elements.length === 0) return;
+
+  // Parse and sort by line number
+  const mapped = elements
+    .map(el => ({ el, line: parseInt(el.getAttribute('data-line')!, 10) }))
+    .filter(e => !isNaN(e.line))
+    .sort((a, b) => a.line - b.line);
+  if (mapped.length === 0) return;
+
+  // Find the two bracketing elements
+  let before = mapped[0];
+  let after = mapped[mapped.length - 1];
+  for (let i = 0; i < mapped.length; i++) {
+    if (mapped[i].line <= line) before = mapped[i];
+    if (mapped[i].line >= line) { after = mapped[i]; break; }
+  }
+
+  const containerTop = document.body.getBoundingClientRect().top;
+
+  if (before === after || before.line === after.line) {
+    const top = before.el.getBoundingClientRect().top - containerTop;
+    window.scrollTo({ top, behavior: 'instant' });
+    return;
+  }
+
+  const beforeTop = before.el.getBoundingClientRect().top - containerTop;
+  const afterTop = after.el.getBoundingClientRect().top - containerTop;
+  const fraction = (line - before.line) / (after.line - before.line);
+  const scrollTarget = beforeTop + fraction * (afterTop - beforeTop);
+  window.scrollTo({ top: scrollTarget, behavior: 'instant' });
+}
+
+function scrollToLine(line: number, _totalLines: number): void {
   isScrollingFromEditor = true;
   clearTimeout(scrollFromEditorTimer);
   scrollFromEditorTimer = setTimeout(() => { isScrollingFromEditor = false; }, 200);
 
-  const ratio = totalLines > 1 ? line / (totalLines - 1) : 0;
-  const maxScroll = document.body.scrollHeight - window.innerHeight;
-  const scrollTarget = ratio * maxScroll;
-  window.scrollTo({ top: scrollTarget, behavior: 'instant' });
+  pendingScrollLine = line;
+  applyScrollIfReady();
 }
 
-// Preview → Editor scroll sync
+// Preview → Editor scroll sync (element-based)
 let scrollDebounce: ReturnType<typeof setTimeout> | undefined;
 window.addEventListener('scroll', () => {
   if (isScrollingFromEditor) return;
   clearTimeout(scrollDebounce);
   scrollDebounce = setTimeout(() => {
-    const scrollHeight = document.body.scrollHeight - window.innerHeight;
-    const ratio = scrollHeight > 0 ? window.scrollY / scrollHeight : 0;
-    vscode.postMessage({ type: 'scrollEditor', ratio });
+    const elements = document.querySelectorAll<HTMLElement>('[data-line]');
+    if (elements.length === 0) return;
+
+    // Find the element closest to the viewport top
+    let closestLine = 0;
+    let closestDist = Infinity;
+    for (const el of elements) {
+      const rect = el.getBoundingClientRect();
+      const dist = Math.abs(rect.top);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closestLine = parseInt(el.getAttribute('data-line')!, 10);
+      }
+    }
+    if (!isNaN(closestLine)) {
+      vscode.postMessage({ type: 'scrollEditor', line: closestLine });
+    }
   }, 50);
 });
 
@@ -303,11 +361,15 @@ window.addEventListener('message', async (event) => {
         startOnLoad: false,
         theme: getTheme(),
         securityLevel: 'loose',
+        fontFamily: '"trebuchet ms", verdana, arial, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif',
       });
+      isMermaidRendering = true;
       await applyMermaid();
+      isMermaidRendering = false;
       if (currentVersion !== renderVersion) break;
       applyHighlight();
       applyCopyButtons();
+      applyScrollIfReady();
       break;
     }
     case 'scroll': {
