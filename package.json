@@ -17,7 +17,9 @@
   },
   "homepage": "https://github.com/santkoh/markdown-multi-tab-preview#readme",
   "icon": "media/icon.png",
-  "categories": ["Other"],
+  "categories": [
+    "Other"
+  ],
   "activationEvents": [
     "onLanguage:markdown"
   ],
@@ -73,6 +75,16 @@
           "type": "boolean",
           "default": true,
           "description": ".mdファイルを開いた時にプレビューを自動表示"
+        },
+        "mdMultiTabPreview.retainContextWhenHidden": {
+          "type": "boolean",
+          "default": true,
+          "description": "非表示時もプレビューの状態を保持する（無効にするとメモリ使用量が減少しますが、タブ切り替え時に再レンダリングが発生します）"
+        },
+        "mdMultiTabPreview.allowRemoteImages": {
+          "type": "boolean",
+          "default": true,
+          "description": "プレビューでリモート画像（https://）の読み込みを許可する（無効にするとプライバシーが向上しますが、外部画像が表示されません）"
         }
       }
     }
@@ -87,6 +99,7 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "dompurify": "^3.3.1",
     "highlight.js": "^11.11.1",
     "marked": "^17.0.3",
     "mermaid": "^11.12.3"

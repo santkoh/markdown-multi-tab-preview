@@ -1,5 +1,6 @@
 import mermaid from 'mermaid';
 import hljs from 'highlight.js';
+import DOMPurify from 'dompurify';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: unknown): void;
@@ -19,7 +20,7 @@ function getTheme(): 'dark' | 'default' {
 mermaid.initialize({
   startOnLoad: false,
   theme: getTheme(),
-  securityLevel: 'loose',
+  securityLevel: 'strict',
 });
 
 let mermaidCounter = 0;
@@ -35,7 +36,9 @@ async function applyMermaid(): Promise<void> {
       const { svg } = await mermaid.render(id, source);
       const container = document.createElement('div');
       container.className = 'mermaid-diagram';
-      container.innerHTML = svg;
+      container.innerHTML = DOMPurify.sanitize(svg, {
+        USE_PROFILES: { svg: true, svgFilters: true },
+      });
       el.replaceWith(container);
     } catch (err) {
       const errorDiv = document.createElement('div');
@@ -121,9 +124,10 @@ function scrollToLine(line: number, totalLines: number): void {
   clearTimeout(scrollFromEditorTimer);
   scrollFromEditorTimer = setTimeout(() => { isScrollingFromEditor = false; }, 200);
 
-  const ratio = line / totalLines;
-  const scrollTarget = ratio * document.body.scrollHeight;
-  window.scrollTo({ top: scrollTarget, behavior: 'smooth' });
+  const ratio = totalLines > 1 ? line / (totalLines - 1) : 0;
+  const maxScroll = document.body.scrollHeight - window.innerHeight;
+  const scrollTarget = ratio * maxScroll;
+  window.scrollTo({ top: scrollTarget, behavior: 'instant' });
 }
 
 // Preview → Editor scroll sync
@@ -147,20 +151,27 @@ function escapeForHtml(text: string): string {
 
 const content = document.getElementById('content');
 
+let renderVersion = 0;
+
 window.addEventListener('message', async (event) => {
+  if (!event.data || typeof event.data !== 'object') return;
   const message = event.data;
   switch (message.type) {
     case 'update': {
+      const currentVersion = ++renderVersion;
       if (content) {
-        content.innerHTML = message.html;
+        content.innerHTML = DOMPurify.sanitize(message.html, {
+          FORBID_TAGS: ['form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+        });
       }
       // Re-initialize mermaid with current theme
       mermaid.initialize({
         startOnLoad: false,
         theme: getTheme(),
-        securityLevel: 'loose',
+        securityLevel: 'strict',
       });
       await applyMermaid();
+      if (currentVersion !== renderVersion) break;
       applyHighlight();
       applyCopyButtons();
       break;
@@ -171,3 +182,5 @@ window.addEventListener('message', async (event) => {
     }
   }
 });
+
+vscode.postMessage({ type: 'ready' });

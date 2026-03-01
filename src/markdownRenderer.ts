@@ -1,6 +1,5 @@
 import { Marked, Tokens } from 'marked';
 import * as vscode from 'vscode';
-import * as path from 'path';
 import { escapeHtml } from './utils';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
@@ -48,9 +47,16 @@ export function renderMarkdown(
 
       image({ href, title, text }: Tokens.Image): string {
         let resolvedHref = href;
-        if (href && !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('data:')) {
-          const absUri = vscode.Uri.joinPath(docDir, href);
-          resolvedHref = webview.asWebviewUri(absUri).toString();
+        // Resolve relative paths only — skip absolute URLs (any scheme) and protocol-relative URLs (//)
+        if (href && !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(href)) {
+          // Separate path from query/fragment before resolving with joinPath
+          const qIdx = href.indexOf('?');
+          const hIdx = href.indexOf('#');
+          const splitIdx = qIdx >= 0 && hIdx >= 0 ? Math.min(qIdx, hIdx) : qIdx >= 0 ? qIdx : hIdx;
+          const pathPart = splitIdx >= 0 ? href.slice(0, splitIdx) : href;
+          const suffix = splitIdx >= 0 ? href.slice(splitIdx) : '';
+          const absUri = vscode.Uri.joinPath(docDir, pathPart);
+          resolvedHref = webview.asWebviewUri(absUri).toString() + suffix;
         }
         const titleAttr = title ? ` title="${escapeHtml(title)}"` : '';
         const altText = text ? escapeHtml(text) : '';
@@ -60,5 +66,5 @@ export function renderMarkdown(
   });
 
   const frontmatterHtml = frontmatter ? renderFrontmatterHtml(frontmatter) : '';
-  return frontmatterHtml + (marked.parse(body) as string);
+  return frontmatterHtml + (marked.parse(body, { async: false }) as string);
 }
