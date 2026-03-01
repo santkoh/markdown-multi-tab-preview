@@ -66,6 +66,22 @@ strong { font-weight: 600; }
 ul, ol { padding-left: 2em; margin: 0.5em 0; }
 li { margin: 0.25em 0; }
 
+/* Task list (checkboxes) */
+.task-list-item {
+  list-style: none;
+  margin-left: -1.4em;
+}
+
+.task-checkbox {
+  margin-right: 0.4em;
+  font-size: 1.1em;
+  color: var(--vscode-descriptionForeground);
+}
+
+.task-checkbox-checked {
+  color: var(--vscode-terminal-ansiGreen);
+}
+
 /* Blockquote */
 blockquote {
   border-left: 4px solid var(--vscode-textBlockQuote-border);

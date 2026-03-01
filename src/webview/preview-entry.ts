@@ -20,7 +20,7 @@ function getTheme(): 'dark' | 'default' {
 mermaid.initialize({
   startOnLoad: false,
   theme: getTheme(),
-  securityLevel: 'strict',
+  securityLevel: 'loose',
 });
 
 let mermaidCounter = 0;
@@ -28,17 +28,16 @@ let mermaidCounter = 0;
 async function applyMermaid(): Promise<void> {
   const elements = document.querySelectorAll('.mermaid-source');
   for (const el of elements) {
-    const source = el.getAttribute('data-mermaid');
-    if (!source) continue;
+    const encoded = el.getAttribute('data-mermaid');
+    if (!encoded) continue;
+    const source = atob(encoded);
 
     const id = `mermaid-${mermaidCounter++}`;
     try {
       const { svg } = await mermaid.render(id, source);
       const container = document.createElement('div');
       container.className = 'mermaid-diagram';
-      container.innerHTML = DOMPurify.sanitize(svg, {
-        USE_PROFILES: { svg: true, svgFilters: true },
-      });
+      container.innerHTML = svg;
       el.replaceWith(container);
     } catch (err) {
       const errorDiv = document.createElement('div');
@@ -168,7 +167,7 @@ window.addEventListener('message', async (event) => {
       mermaid.initialize({
         startOnLoad: false,
         theme: getTheme(),
-        securityLevel: 'strict',
+        securityLevel: 'loose',
       });
       await applyMermaid();
       if (currentVersion !== renderVersion) break;

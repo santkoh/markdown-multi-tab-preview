@@ -50,7 +50,6 @@ Click the edit icon in the preview panel's title bar, or use the Command Palette
 
 ## Known Issues
 
-- Scroll sync is one-directional (editor → preview only).
 - VS Code's built-in Markdown preview coexists with this extension. Use the command prefix to distinguish them.
 
 ## License
