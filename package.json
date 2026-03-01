@@ -80,6 +80,11 @@
           "type": "boolean",
           "default": true,
           "description": "非表示時もプレビューの状態を保持する（無効にするとメモリ使用量が減少しますが、タブ切り替え時に再レンダリングが発生します）"
+        },
+        "mdMultiTabPreview.allowRemoteImages": {
+          "type": "boolean",
+          "default": true,
+          "description": "プレビューでリモート画像（https://）の読み込みを許可する（無効にするとプライバシーが向上しますが、外部画像が表示されません）"
         }
       }
     }

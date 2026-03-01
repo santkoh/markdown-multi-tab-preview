@@ -69,6 +69,7 @@ export class PreviewPanel {
 
     // Listen for document changes (F-05: real-time update with 300ms debounce)
     vscode.workspace.onDidChangeTextDocument((e) => {
+      if (this.isDisposed) return;
       if (e.document.uri.toString() === this.document.uri.toString()) {
         this.scheduleUpdate();
       }
@@ -76,9 +77,8 @@ export class PreviewPanel {
 
     // Listen for scroll changes (F-06: Editor → Preview scroll sync)
     vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
-      if (this.isScrollingFromPreview) return;
+      if (this.isDisposed || this.isScrollingFromPreview || !this.panel.visible) return;
       if (e.textEditor.document.uri.toString() === this.document.uri.toString()) {
-        if (this.isDisposed) return;
         const firstVisibleLine = e.visibleRanges[0]?.start.line ?? 0;
         const totalLines = e.textEditor.document.lineCount;
         this.panel.webview.postMessage({
@@ -124,9 +124,13 @@ export class PreviewPanel {
     if (!Number.isFinite(ratio)) return;
     ratio = Math.max(0, Math.min(1, ratio));
 
-    const editor = vscode.window.visibleTextEditors.find(
-      (e) => e.document.uri.toString() === this.document.uri.toString()
-    );
+    const uriStr = this.document.uri.toString();
+    const active = vscode.window.activeTextEditor;
+    const editor = active?.document.uri.toString() === uriStr
+      ? active
+      : vscode.window.visibleTextEditors.find(
+          (e) => e.document.uri.toString() === uriStr
+        );
     if (!editor) return;
 
     this.isScrollingFromPreview = true;
@@ -179,6 +183,10 @@ export class PreviewPanel {
     const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'preview.css'));
     const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'preview.js'));
     const csp = webview.cspSource;
+    const allowRemote = vscode.workspace
+      .getConfiguration('mdMultiTabPreview')
+      .get<boolean>('allowRemoteImages', true);
+    const imgSrc = allowRemote ? `${csp} https: data:` : `${csp} data:`;
 
     webview.html = `<!DOCTYPE html>
 <html lang="en">
@@ -186,7 +194,7 @@ export class PreviewPanel {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy"
-    content="default-src 'none'; img-src ${csp} https: data:; script-src 'nonce-${nonce}'; style-src ${csp} 'unsafe-inline'; font-src ${csp};">
+    content="default-src 'none'; img-src ${imgSrc}; script-src 'nonce-${nonce}'; style-src ${csp} 'unsafe-inline'; font-src ${csp};">
   <link rel="stylesheet" href="${cssUri}">
   <title>Preview</title>
 </head>

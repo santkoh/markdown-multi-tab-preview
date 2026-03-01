@@ -47,7 +47,8 @@ export function renderMarkdown(
 
       image({ href, title, text }: Tokens.Image): string {
         let resolvedHref = href;
-        if (href && !href.startsWith('http://') && !href.startsWith('https://') && !href.startsWith('data:')) {
+        // Resolve relative paths only — skip absolute URLs (any scheme) and protocol-relative URLs (//)
+        if (href && !/^(?:[a-z][a-z0-9+.-]*:|\/\/)/i.test(href)) {
           const absUri = vscode.Uri.joinPath(docDir, href);
           resolvedHref = webview.asWebviewUri(absUri).toString();
         }
