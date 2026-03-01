@@ -16,6 +16,7 @@
     "url": "https://github.com/santkoh/markdown-multi-tab-preview/issues"
   },
   "homepage": "https://github.com/santkoh/markdown-multi-tab-preview#readme",
+  "icon": "media/icon.png",
   "categories": ["Other"],
   "activationEvents": [
     "onLanguage:markdown"
