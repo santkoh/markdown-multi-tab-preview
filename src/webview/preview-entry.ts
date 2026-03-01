@@ -37,7 +37,12 @@ async function applyMermaid(): Promise<void> {
       const { svg } = await mermaid.render(id, source);
       const container = document.createElement('div');
       container.className = 'mermaid-diagram';
-      container.innerHTML = svg;
+      container.innerHTML = DOMPurify.sanitize(svg, {
+        ADD_TAGS: ['foreignobject'],
+        ADD_ATTR: ['dominant-baseline'],
+        HTML_INTEGRATION_POINTS: { foreignobject: true },
+        FORBID_CONTENTS: [],
+      });
       el.replaceWith(container);
     } catch (err) {
       const errorDiv = document.createElement('div');
