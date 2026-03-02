@@ -1,0 +1,121 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: "30 15 * * 0" # 月曜 00:30 JST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24.x"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Run pnpm audit
+        run: pnpm audit --audit-level moderate
+        id: audit
+        continue-on-error: true
+      - name: Create issue on failure
+        if: steps.audit.outcome == 'failure'
+        run: |
+          # 重複防止: 同タイトルの open Issue を検索
+          existing=$(gh issue list --label "security" --label "automated" \
+            --search "[Security] Dependency vulnerability detected" \
+            --state open --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh issue create \
+              --title "[Security] Dependency vulnerability detected" \
+              --label "security" --label "automated" \
+              --body "$(cat <<'EOF'
+          ## Dependency Audit Failed
+
+          `pnpm audit --audit-level moderate` で脆弱性が検出されました。
+
+          ### 対応手順
+          1. `pnpm audit` を実行して詳細を確認
+          2. `pnpm update` または個別パッケージのアップデートで修正
+          3. Dependabot PR がある場合はマージを検討
+          4. 修正後、このIssueをクローズ
+
+          ### 参考
+          - [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+          )"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+
+  code-patterns:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v6
+      - name: Check for dangerous patterns
+        id: patterns
+        run: |
+          # 危険パターン検出 (既知の安全な使用を除外)
+          RESULT=""
+          # child_process の import/require
+          RESULT+=$(grep -rn "child_process\|from 'child_process'" src/ 2>/dev/null || true)
+          # process.exec / process.spawn (document.execCommand は除外)
+          RESULT+=$(grep -rn '\.exec\s*(' src/ 2>/dev/null | grep -v 'execCommand' || true)
+          RESULT+=$(grep -rn '\.spawn\s*(' src/ 2>/dev/null || true)
+          # eval / new Function
+          RESULT+=$(grep -rn '\beval\s*(' src/ 2>/dev/null || true)
+          RESULT+=$(grep -rn 'new\s\+Function\s*(' src/ 2>/dev/null || true)
+          # fs module direct usage
+          RESULT+=$(grep -rn "from 'fs'\|require('fs')" src/ 2>/dev/null || true)
+
+          if [ -n "$RESULT" ]; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+            echo "$RESULT" > /tmp/pattern-results.txt
+          else
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Create issue on detection
+        if: steps.patterns.outputs.found == 'true'
+        run: |
+          DETAILS=$(cat /tmp/pattern-results.txt)
+          existing=$(gh issue list --label "security" --label "automated" \
+            --search "[Security] Dangerous code pattern detected" \
+            --state open --json number --jq '.[0].number // empty')
+          if [ -z "$existing" ]; then
+            gh issue create \
+              --title "[Security] Dangerous code pattern detected" \
+              --label "security" --label "automated" \
+              --body "$(cat <<EOF
+          ## Dangerous Code Pattern Detected
+
+          以下の危険なコードパターンが検出されました:
+
+          \`\`\`
+          $DETAILS
+          \`\`\`
+
+          ### 確認ポイント
+          - \`child_process\` / \`exec\` / \`spawn\`: シェルコマンド実行の必要性を確認
+          - \`eval\` / \`new Function\`: 動的コード実行のリスクを確認
+          - \`fs\` モジュール: ファイルアクセスの正当性を確認
+
+          ### 参考
+          - [Workflow Run](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          EOF
+          )"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
