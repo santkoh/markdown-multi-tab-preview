@@ -9,6 +9,7 @@ function isMarkdownFile(document: vscode.TextDocument): boolean {
   return /\.(?:md|markdown)$/i.test(document.uri.fsPath);
 }
 
+/** Activate the extension: register commands, listeners, and auto-preview. */
 export function activate(context: vscode.ExtensionContext): void {
   previewManager = new PreviewManager(context.extensionUri);
 
@@ -89,6 +90,7 @@ export function activate(context: vscode.ExtensionContext): void {
   });
 }
 
+/** Deactivate the extension and dispose all preview panels. */
 export function deactivate(): void {
   previewManager?.dispose();
 }

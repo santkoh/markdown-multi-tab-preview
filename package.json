@@ -22,7 +22,8 @@
   ],
   "activationEvents": [
     "onLanguage:markdown",
-    "workspaceContains:**/*.md"
+    "workspaceContains:**/*.md",
+    "workspaceContains:**/*.markdown"
   ],
   "main": "./dist/extension.js",
   "scripts": {
