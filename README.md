@@ -48,6 +48,10 @@ Click the edit icon in the preview panel's title bar, or use the Command Palette
 
 - VS Code `1.100.0` or later
 
+## Release Notes
+
+See the [Changelog](CHANGELOG.md) for a full list of changes in each version.
+
 ## Known Issues
 
 - VS Code's built-in Markdown preview coexists with this extension. Use the command prefix to distinguish them.

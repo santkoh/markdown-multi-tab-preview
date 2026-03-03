@@ -21,7 +21,9 @@
     "Other"
   ],
   "activationEvents": [
-    "onLanguage:markdown"
+    "onLanguage:markdown",
+    "workspaceContains:**/*.md",
+    "workspaceContains:**/*.markdown"
   ],
   "main": "./dist/extension.js",
   "scripts": {
@@ -51,14 +53,14 @@
         "command": "mdMultiTabPreview.togglePreview",
         "key": "ctrl+shift+v",
         "mac": "cmd+shift+v",
-        "when": "editorLangId == markdown || activeWebviewPanelId == mdMultiTabPreview"
+        "when": "editorLangId == markdown || resourceExtname == .md || resourceExtname == .markdown || activeWebviewPanelId == mdMultiTabPreview"
       }
     ],
     "menus": {
       "editor/title": [
         {
           "command": "mdMultiTabPreview.showPreview",
-          "when": "editorLangId == markdown",
+          "when": "editorLangId == markdown || resourceExtname == .md || resourceExtname == .markdown",
           "group": "navigation"
         },
         {
