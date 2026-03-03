@@ -6,6 +6,19 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0] - 2026-03-03
+
+### Added
+
+- **CHANGELOG.md** — full version history now available on the Marketplace
+  "Changelog" tab and linked from README.
+
+### Fixed
+
+- Preview now opens for `.md` files even when another extension overrides the
+  language ID (e.g. skill files in `.claude/skills/`). Detection falls back to
+  file extension when `languageId` is not `markdown`.
+
 ## [0.4.2] - 2026-03-02
 
 ### Security
@@ -83,6 +96,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.5.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.4.0...v0.4.2
 [0.4.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.2.1...v0.3.0
