@@ -6,6 +6,19 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.0] - 2026-03-08
+
+### Added
+
+- **Color swatch decorator** — inline color swatches are now displayed next to
+  color codes (Hex, RGB/RGBA, HSL/HSLA) in both code blocks and body text.
+  Configurable via `mdMultiTabPreview.colorDecorator` (default: true).
+
+### Security
+
+- Updated DOMPurify from 3.3.1 to 3.3.2 to fix XSS vulnerability
+  (GHSA-v2wj-7wpq-c8vv).
+
 ## [0.5.0] - 2026-03-03
 
 ### Added
@@ -96,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.6.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.4.0...v0.4.2
 [0.4.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.3.0...v0.4.0
