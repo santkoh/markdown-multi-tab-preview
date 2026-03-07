@@ -87,6 +87,11 @@
           "type": "boolean",
           "default": true,
           "description": "プレビューでリモート画像（https://）の読み込みを許可する（無効にするとプライバシーが向上しますが、外部画像が表示されません）"
+        },
+        "mdMultiTabPreview.colorDecorator": {
+          "type": "boolean",
+          "default": true,
+          "description": "プレビューでカラーコードの横に色見本を表示する"
         }
       }
     }

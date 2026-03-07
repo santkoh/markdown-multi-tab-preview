@@ -432,3 +432,14 @@ body.vscode-light .hljs-selector-attr,
 body.vscode-light .hljs-selector-pseudo { color: #800000; }
 body.vscode-light .hljs-addition { color: #098658; background: rgba(155, 185, 85, 0.1); }
 body.vscode-light .hljs-deletion { color: #a31515; background: rgba(206, 145, 120, 0.1); }
+
+/* Color swatch */
+.color-swatch {
+  display: inline-block;
+  width: 0.85em;
+  height: 0.85em;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 2px;
+  vertical-align: middle;
+  margin-right: 2px;
+}
