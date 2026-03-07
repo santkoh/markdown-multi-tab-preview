@@ -76,6 +76,14 @@ export class PreviewPanel {
       }
     }, null, this.disposables);
 
+    // Re-render when colorDecorator setting changes
+    vscode.workspace.onDidChangeConfiguration((e) => {
+      if (this.isDisposed) return;
+      if (e.affectsConfiguration('mdMultiTabPreview.colorDecorator')) {
+        this.scheduleUpdate();
+      }
+    }, null, this.disposables);
+
     // Listen for scroll changes (F-06: Editor → Preview scroll sync)
     vscode.window.onDidChangeTextEditorVisibleRanges((e) => {
       if (this.isDisposed || this.isScrollingFromPreview || !this.panel.visible) return;
@@ -168,6 +176,9 @@ export class PreviewPanel {
       this.panel.webview.postMessage({
         type: 'update',
         html,
+        colorDecorator: vscode.workspace
+          .getConfiguration('mdMultiTabPreview')
+          .get<boolean>('colorDecorator', true),
       });
     } catch (err) {
       console.error('Failed to update preview:', err);

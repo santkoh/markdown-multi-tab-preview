@@ -250,6 +250,87 @@ function applyCopyButtons(): void {
   }
 }
 
+// Color swatch detection regex
+const COLOR_RE = /(?<![&#\w])#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})(?!\w)|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*[\d.]+)?\s*\)|hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%(?:\s*,\s*[\d.]+)?\s*\)/g;
+
+function createSwatchSpan(color: string): HTMLSpanElement {
+  const span = document.createElement('span');
+  span.className = 'color-swatch';
+  span.style.backgroundColor = color;
+  return span;
+}
+
+function processTextNode(textNode: Text): void {
+  const text = textNode.textContent || '';
+  const matches = [...text.matchAll(COLOR_RE)].reverse();
+  for (const match of matches) {
+    const offset = match.index!;
+    const rest = textNode.splitText(offset);
+    rest.splitText(match[0].length);
+    const swatch = createSwatchSpan(match[0]);
+    rest.parentNode!.insertBefore(swatch, rest);
+  }
+}
+
+function applySwatchesToCodeBlock(el: HTMLElement): void {
+  const fullText = el.textContent || '';
+  const matches = [...fullText.matchAll(COLOR_RE)];
+  if (matches.length === 0) return;
+
+  // Collect text nodes with cumulative offsets
+  const textNodes: { node: Text; start: number; end: number }[] = [];
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let cumulative = 0;
+  let tn: Text | null;
+  while ((tn = walker.nextNode() as Text | null)) {
+    textNodes.push({ node: tn, start: cumulative, end: cumulative + tn.length });
+    cumulative += tn.length;
+  }
+
+  // Process matches in reverse to avoid offset shifts
+  for (const match of matches.reverse()) {
+    const matchStart = match.index!;
+    const entry = textNodes.find(e => e.start <= matchStart && matchStart < e.end);
+    if (!entry) continue;
+    const localOffset = matchStart - entry.start;
+    if (localOffset > 0) {
+      entry.node.splitText(localOffset);
+      const newNode = entry.node.nextSibling as Text;
+      const swatch = createSwatchSpan(match[0]);
+      newNode.parentNode!.insertBefore(swatch, newNode);
+    } else {
+      const swatch = createSwatchSpan(match[0]);
+      entry.node.parentNode!.insertBefore(swatch, entry.node);
+    }
+  }
+}
+
+function applyColorSwatches(): void {
+  if (!content) return;
+
+  // Strategy 1: Code blocks (pre code) — offset mapping for hljs-split nodes
+  const codeBlocks = content.querySelectorAll<HTMLElement>('pre code');
+  for (const code of codeBlocks) {
+    applySwatchesToCodeBlock(code);
+  }
+
+  // Strategy 2: Other text nodes — simple TreeWalker
+  const textWalker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      if (node.parentElement?.closest('pre code')) return NodeFilter.FILTER_REJECT;
+      if (node.parentElement?.closest('.mermaid-diagram')) return NodeFilter.FILTER_REJECT;
+      return NodeFilter.FILTER_ACCEPT;
+    }
+  });
+  const textNodes: Text[] = [];
+  let node: Text | null;
+  while ((node = textWalker.nextNode() as Text | null)) textNodes.push(node);
+
+  for (const textNode of textNodes) {
+    processTextNode(textNode);
+  }
+}
+
 // Prevent infinite scroll loop between editor ↔ preview
 let isScrollingFromEditor = false;
 let scrollFromEditorTimer: ReturnType<typeof setTimeout> | undefined;
@@ -369,6 +450,9 @@ window.addEventListener('message', async (event) => {
       if (currentVersion !== renderVersion) break;
       applyHighlight();
       applyCopyButtons();
+      if (message.colorDecorator !== false) {
+        applyColorSwatches();
+      }
       applyScrollIfReady();
       break;
     }
