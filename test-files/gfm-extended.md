@@ -108,7 +108,7 @@ https://github.com/santkoh/markdown-multi-tab-preview
 
 Email-like: user@example.com
 
-Regular link: [Click here](https://example.com)
+Regular link: [Example documentation](https://example.com)
 
 ## 8. Inline Code with Special Characters
 

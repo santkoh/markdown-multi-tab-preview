@@ -58,20 +58,20 @@ $100, 10000, 100, 100CHF
 
 ## 6. Emoji
 
-Unicode emoji in text: Hello World!
+Unicode emoji in text: Hello 🌍!
 
 Emoji in headings, lists, and tables:
 
-### Star Section
+### ⭐ Star Section
 
-- Fire item
-- Check item
+- 🔥 Fire item
+- ✅ Check item
 
 | Emoji | Name |
 |-------|------|
-| Smile | smile |
-| Heart | heart |
-| Rocket | rocket |
+| 🙂 | smile |
+| ❤️ | heart |
+| 🚀 | rocket |
 
 ## 7. Deeply Nested Lists
 

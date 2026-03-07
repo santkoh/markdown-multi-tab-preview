@@ -133,5 +133,5 @@ This paragraph has <strong>bold text (safe)</strong> and <script>alert('evil')</
 
 1. **Visual check**: Compare each section against its "Expected" description
 2. **No alerts**: At no point should a browser alert/dialog appear
-3. **DevTools**: Right-click > Inspect on suspicious elements to verify dangerous attributes are absent
-4. **Console**: Open DevTools Console - no script errors from injected code should appear
+3. **Webview DevTools**: In Extension Development Host, run `Developer: Toggle Developer Tools`, select the webview's **active-frame** in the DevTools Console execution context dropdown, then inspect suspicious elements to verify dangerous attributes are absent
+4. **Console**: Confirm no injected code executes and no related errors appear in the webview's console context
