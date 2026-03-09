@@ -109,7 +109,7 @@
     "@panzoom/panzoom": "^4.6.1",
     "dompurify": "^3.3.2",
     "highlight.js": "^11.11.1",
-    "marked": "^17.0.3",
+    "marked": "^17.0.4",
     "mermaid": "^11.12.3"
   }
 }
