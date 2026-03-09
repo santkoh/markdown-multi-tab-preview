@@ -6,6 +6,16 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.1] - 2026-03-09
+
+### Fixed
+
+- Fixed Mermaid diagram border becoming invisible behind SVG elements when
+  zoomed in (switched from CSS `outline` to a `::after` pseudo-element with
+  proper z-index).
+- Fixed cursor changing to move icon when hovering over Mermaid diagrams
+  without entering pan/zoom mode.
+
 ## [0.6.0] - 2026-03-08
 
 ### Added
@@ -109,6 +119,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.6.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.4.2...v0.5.0
 [0.4.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.4.0...v0.4.2
