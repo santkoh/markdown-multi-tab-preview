@@ -243,22 +243,27 @@ img {
 }
 
 .mermaid-panzoom-wrapper {
-  /* cursor is set via .mermaid-zoom-active when mode is ON */
+  /* Override panzoom's inline cursor: move when mode is OFF */
+  cursor: default !important;
 }
 
 /* Mode ON: grab cursor */
 .mermaid-zoom-active .mermaid-panzoom-wrapper {
-  cursor: grab;
+  cursor: grab !important;
 }
 .mermaid-zoom-active .mermaid-panzoom-wrapper:active {
-  cursor: grabbing;
+  cursor: grabbing !important;
 }
 
-/* Mode ON: outline border */
-.mermaid-zoom-active {
-  outline: 2px solid var(--vscode-focusBorder);
-  outline-offset: -2px;
+/* Mode ON: border via pseudo-element to stay above zoomed content */
+.mermaid-zoom-active::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid var(--vscode-focusBorder);
   border-radius: 4px;
+  z-index: 5;
+  pointer-events: none;
 }
 
 /* Mode ON: toolbar always visible */
