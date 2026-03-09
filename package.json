@@ -98,7 +98,7 @@
   },
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
-    "@types/node": "^25.3.3",
+    "@types/node": "^25.3.5",
     "@types/vscode": "^1.109.0",
     "@vscode/vsce": "^3.7.1",
     "esbuild": "^0.27.3",
@@ -109,7 +109,7 @@
     "@panzoom/panzoom": "^4.6.1",
     "dompurify": "^3.3.2",
     "highlight.js": "^11.11.1",
-    "marked": "^17.0.3",
+    "marked": "^17.0.4",
     "mermaid": "^11.12.3"
   }
 }
