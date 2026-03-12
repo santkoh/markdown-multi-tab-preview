@@ -96,14 +96,14 @@
         "mdMultiTabPreview.toc.enabled": {
           "type": "boolean",
           "default": true,
-          "description": "プレビューにTOC（目次）サイドバーを表示する"
+          "description": "プレビューにOutline（目次）サイドバーを表示する"
         },
         "mdMultiTabPreview.toc.maxDepth": {
           "type": "number",
           "default": 3,
           "minimum": 1,
           "maximum": 6,
-          "description": "TOCに表示する見出しの最大レベル（1〜6）"
+          "description": "Outlineに表示する見出しの最大レベル（1〜6）"
         }
       }
     }

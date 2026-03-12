@@ -449,44 +449,43 @@ body.vscode-light .hljs-deletion { color: #a31515; background: rgba(206, 145, 12
   margin-right: 2px;
 }
 
-/* ===== TOC Sidebar ===== */
+/* ===== Outline Sidebar ===== */
 
-/* Flex layout when TOC is visible */
+/* Content offset when sidebar is visible — no overlap */
 body.toc-visible {
-  display: flex;
-  flex-direction: row;
-  max-width: none;
-  padding: 0;
-  align-items: flex-start;
+  padding-left: 225px; /* sidebar 200px + 1px border + 24px gap */
 }
 
-/* Content area adjustment when TOC visible */
 body.toc-visible #content {
-  flex: 1;
-  min-width: 0;
-  padding: 16px 24px;
   max-width: 960px;
 }
 
-/* When headings exist but TOC is closed, add top padding for toggle button */
+/* Reserve space for toggle button when headings exist but sidebar closed */
 body.toc-has-headings:not(.toc-visible) {
-  padding-top: 48px;
+  padding-top: 36px;
 }
 
-/* TOC sidebar container */
+/* Sidebar — fixed to left edge, full viewport height */
 .toc-sidebar {
   display: none;
-  width: 220px;
-  min-width: 220px;
-  max-height: 100vh;
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  width: 200px;
+  height: 100vh;
   overflow-y: auto;
-  background: var(--vscode-sideBar-background, var(--vscode-editor-background));
-  color: var(--vscode-sideBar-foreground, var(--vscode-editor-foreground));
-  border-right: 1px solid var(--vscode-panel-border);
-  flex-shrink: 0;
-  font-size: var(--vscode-font-size, 14px);
+  overscroll-behavior: contain;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  border-right: 1px solid var(--vscode-widget-border, var(--vscode-panel-border));
+  font-size: 13px;
+  z-index: 100;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+}
+
+.toc-sidebar:hover {
+  scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
 }
 
 body.toc-visible .toc-sidebar {
@@ -494,38 +493,44 @@ body.toc-visible .toc-sidebar {
   flex-direction: column;
 }
 
-/* TOC header */
+/* Header */
 .toc-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 8px 12px;
-  border-bottom: 1px solid var(--vscode-panel-border);
+  padding: 0 8px 0 14px;
+  height: 32px;
+  min-height: 32px;
   position: sticky;
   top: 0;
-  background: inherit;
+  background: var(--vscode-editor-background);
   z-index: 1;
 }
 
 .toc-title {
-  font-size: 0.75em;
-  font-weight: 600;
+  font-size: 11px;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--vscode-sideBarSectionHeader-foreground, var(--vscode-descriptionForeground));
+  letter-spacing: 0.04em;
+  color: var(--vscode-foreground);
+  opacity: 0.5;
+  user-select: none;
 }
 
-/* Close button [×] */
+/* Close button */
 .toc-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: none;
   border: none;
-  color: var(--vscode-icon-foreground, var(--vscode-editor-foreground));
+  color: var(--vscode-icon-foreground, var(--vscode-foreground));
   cursor: pointer;
-  padding: 2px 4px;
-  border-radius: 3px;
-  font-size: 1em;
+  padding: 3px;
+  border-radius: 4px;
   line-height: 1;
-  opacity: 0.7;
+  opacity: 0.5;
+  transition: opacity 0.15s;
 }
 
 .toc-close-btn:hover {
@@ -533,79 +538,86 @@ body.toc-visible .toc-sidebar {
   opacity: 1;
 }
 
-/* TOC list (nav container) */
+/* List (nav container) */
 .toc-list {
-  padding: 8px 0;
+  padding: 2px 0;
   flex: 1;
 }
 
-/* Individual TOC items */
+/* Individual items */
 .toc-item {
   display: block;
-  padding: 4px 12px;
-  font-size: 0.82em;
-  color: var(--vscode-sideBar-foreground, var(--vscode-editor-foreground));
+  padding: 2px 12px;
+  line-height: 22px;
+  font-size: 12px;
+  color: var(--vscode-foreground);
   text-decoration: none;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   cursor: pointer;
-  border-left: 2px solid transparent;
-  transition: background 0.1s;
+  opacity: 0.7;
+  transition: opacity 0.1s, background 0.1s;
 }
 
 .toc-item:hover {
   background: var(--vscode-list-hoverBackground);
+  opacity: 1;
   text-decoration: none;
 }
 
-/* Active (currently visible) heading highlight */
+/* Active heading */
 .toc-item-active {
-  background: var(--vscode-list-activeSelectionBackground);
-  color: var(--vscode-list-activeSelectionForeground, var(--vscode-editor-foreground));
-  border-left-color: var(--vscode-focusBorder);
+  opacity: 1;
+  color: var(--vscode-foreground);
+  background: var(--vscode-list-hoverBackground);
+  font-weight: 500;
 }
 
 /* Depth-based indentation */
-.toc-item-h1 { padding-left: 12px; }
-.toc-item-h2 { padding-left: 24px; }
-.toc-item-h3 { padding-left: 36px; }
-.toc-item-h4 { padding-left: 44px; }
-.toc-item-h5 { padding-left: 52px; }
-.toc-item-h6 { padding-left: 60px; }
+.toc-item-h1 { padding-left: 10px; }
+.toc-item-h2 { padding-left: 22px; }
+.toc-item-h3 { padding-left: 34px; }
+.toc-item-h4 { padding-left: 42px; }
+.toc-item-h5 { padding-left: 50px; }
+.toc-item-h6 { padding-left: 58px; }
 
-/* Toggle button [≡] — shown when TOC hidden but headings exist */
+/* Toggle button — shown when sidebar is closed but headings exist */
 .toc-toggle-btn {
   display: none;
   position: fixed;
-  top: 12px;
-  left: 12px;
+  top: 10px;
+  left: 10px;
   z-index: 100;
   background: var(--vscode-editor-background);
-  color: var(--vscode-editor-foreground);
-  border: 1px solid var(--vscode-panel-border);
-  border-radius: 4px;
+  color: var(--vscode-foreground);
+  border: 1px solid var(--vscode-widget-border, var(--vscode-panel-border));
+  border-radius: 6px;
   width: 28px;
   height: 28px;
   cursor: pointer;
-  font-size: 1.1em;
   line-height: 1;
   align-items: center;
   justify-content: center;
-  opacity: 0.7;
-  transition: opacity 0.15s;
+  opacity: 0;
+  transition: opacity 0.2s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.24);
 }
 
 body.toc-has-headings:not(.toc-visible) .toc-toggle-btn {
   display: flex;
 }
 
+body.toc-has-headings:not(.toc-visible):hover .toc-toggle-btn {
+  opacity: 0.7;
+}
+
 .toc-toggle-btn:hover {
-  opacity: 1;
+  opacity: 1 !important;
   background: var(--vscode-toolbar-hoverBackground);
 }
 
-/* Hide toggle when TOC is visible */
+/* Hide toggle when sidebar is visible */
 body.toc-visible .toc-toggle-btn {
   display: none;
 }

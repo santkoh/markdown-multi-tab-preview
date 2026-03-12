@@ -4,10 +4,12 @@ import { PreviewPanel } from './previewPanel';
 export class PreviewManager {
   private panels = new Map<string, PreviewPanel>();
   private readonly extensionUri: vscode.Uri;
+  private readonly workspaceState: vscode.Memento;
   private lastActivePreviewUri: string | undefined;
 
-  constructor(extensionUri: vscode.Uri) {
+  constructor(extensionUri: vscode.Uri, workspaceState: vscode.Memento) {
     this.extensionUri = extensionUri;
+    this.workspaceState = workspaceState;
   }
 
   public openPreview(document: vscode.TextDocument, viewColumn?: vscode.ViewColumn): void {
@@ -23,7 +25,7 @@ export class PreviewManager {
       || vscode.window.activeTextEditor?.viewColumn
       || vscode.ViewColumn.Active;
 
-    const panel = new PreviewPanel(document, this.extensionUri, column);
+    const panel = new PreviewPanel(document, this.extensionUri, column, this.workspaceState);
     this.panels.set(key, panel);
     this.lastActivePreviewUri = key;
 

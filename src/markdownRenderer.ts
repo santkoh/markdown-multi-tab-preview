@@ -5,7 +5,7 @@ import { escapeHtml } from './utils';
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
 export interface TocHeading {
-  text: string;   // plain text, escapeHtml() applied
+  text: string;   // plain text (unescaped) — webview uses textContent for XSS safety
   depth: number;  // 1-6
   line: number;   // source line number
 }
@@ -171,7 +171,7 @@ export function renderMarkdown(
   const headings: TocHeading[] = tokens
     .filter((t): t is Tokens.Heading => t.type === 'heading')
     .map(t => ({
-      text: escapeHtml(extractPlainText(t.tokens)),
+      text: extractPlainText(t.tokens),
       depth: t.depth,
       line: tokenLineMap.get(t) ?? 0,
     }));
