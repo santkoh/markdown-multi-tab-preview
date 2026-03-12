@@ -76,10 +76,14 @@ export class PreviewPanel {
       }
     }, null, this.disposables);
 
-    // Re-render when colorDecorator setting changes
+    // Re-render when colorDecorator or TOC settings change
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (this.isDisposed) return;
-      if (e.affectsConfiguration('mdMultiTabPreview.colorDecorator')) {
+      if (
+        e.affectsConfiguration('mdMultiTabPreview.colorDecorator') ||
+        e.affectsConfiguration('mdMultiTabPreview.toc.enabled') ||
+        e.affectsConfiguration('mdMultiTabPreview.toc.maxDepth')
+      ) {
         this.scheduleUpdate();
       }
     }, null, this.disposables);
@@ -168,17 +172,19 @@ export class PreviewPanel {
     if (this.isDisposed) return;
     this.isDirty = false;
     try {
-      const html = renderMarkdown(
+      const { html, headings } = renderMarkdown(
         this.document.getText(),
         this.panel.webview,
         this.document.uri
       );
+      const config = vscode.workspace.getConfiguration('mdMultiTabPreview');
       this.panel.webview.postMessage({
         type: 'update',
         html,
-        colorDecorator: vscode.workspace
-          .getConfiguration('mdMultiTabPreview')
-          .get<boolean>('colorDecorator', true),
+        headings,
+        colorDecorator: config.get<boolean>('colorDecorator', true),
+        tocEnabled: config.get<boolean>('toc.enabled', true),
+        tocMaxDepth: config.get<number>('toc.maxDepth', 3),
       });
     } catch (err) {
       console.error('Failed to update preview:', err);
@@ -209,6 +215,14 @@ export class PreviewPanel {
   <title>Preview</title>
 </head>
 <body>
+  <button id="toc-toggle" class="toc-toggle-btn" title="Table of Contents">&#9776;</button>
+  <div id="toc-sidebar" class="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-title">Table of Contents</span>
+      <button class="toc-close-btn" title="Close TOC">&times;</button>
+    </div>
+    <nav id="toc-list" class="toc-list"></nav>
+  </div>
   <div id="content"></div>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>

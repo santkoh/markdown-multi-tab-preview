@@ -335,6 +335,11 @@ function applyColorSwatches(): void {
 let isScrollingFromEditor = false;
 let scrollFromEditorTimer: ReturnType<typeof setTimeout> | undefined;
 
+// TOC scroll sync flag (same pattern as isScrollingFromEditor)
+let isScrollingFromToc = false;
+let scrollFromTocTimer: ReturnType<typeof setTimeout> | undefined;
+let tocObserver: IntersectionObserver | null = null;
+
 // Mermaid async rendering coordination
 let pendingScrollLine: number | null = null;
 let isMermaidRendering = false;
@@ -391,7 +396,7 @@ function scrollToLine(line: number, _totalLines: number): void {
 // Preview → Editor scroll sync (element-based)
 let scrollDebounce: ReturnType<typeof setTimeout> | undefined;
 window.addEventListener('scroll', () => {
-  if (isScrollingFromEditor) return;
+  if (isScrollingFromEditor || isScrollingFromToc) return;
   clearTimeout(scrollDebounce);
   scrollDebounce = setTimeout(() => {
     const elements = document.querySelectorAll<HTMLElement>('[data-line]');
@@ -413,6 +418,116 @@ window.addEventListener('scroll', () => {
     }
   }, 50);
 });
+
+interface TocHeading {
+  text: string;
+  depth: number;
+  line: number;
+}
+
+function buildToc(headings: TocHeading[], maxDepth: number): void {
+  const tocList = document.getElementById('toc-list');
+  const tocToggle = document.getElementById('toc-toggle');
+  if (!tocList || !tocToggle) return;
+
+  // Cleanup previous IntersectionObserver
+  if (tocObserver) {
+    tocObserver.disconnect();
+    tocObserver = null;
+  }
+
+  // Filter by maxDepth
+  const filtered = headings.filter(h => h.depth <= maxDepth);
+
+  // Clear existing TOC items
+  tocList.replaceChildren();
+
+  if (filtered.length === 0) {
+    document.body.classList.remove('toc-has-headings');
+    document.body.classList.remove('toc-visible');
+    return;
+  }
+
+  document.body.classList.add('toc-has-headings');
+
+  for (const h of filtered) {
+    const a = document.createElement('a');
+    a.className = `toc-item toc-item-h${h.depth}`;
+    a.textContent = h.text;    // textContent for XSS prevention - DO NOT use innerHTML
+    a.title = h.text;           // tooltip for truncated text
+    a.href = 'javascript:void(0)';
+    a.dataset.line = String(h.line);
+    a.addEventListener('click', () => {
+      // Find target heading by data-line attribute
+      const target = document.querySelector<HTMLElement>(`[data-line="${h.line}"]`);
+      if (!target) return;
+
+      // Suppress Preview→Editor scroll sync during TOC scroll
+      isScrollingFromToc = true;
+      clearTimeout(scrollFromTocTimer);
+      target.scrollIntoView({ behavior: 'smooth' });
+      scrollFromTocTimer = setTimeout(() => { isScrollingFromToc = false; }, 500);
+    });
+    tocList.appendChild(a);
+  }
+
+  // IntersectionObserver for current position highlighting
+  const headingSelector = Array.from({ length: maxDepth }, (_, i) => `h${i + 1}`).join(',');
+  const headingEls = document.querySelectorAll<HTMLElement>(headingSelector);
+
+  tocObserver = new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      if (entry.isIntersecting) {
+        const line = entry.target.getAttribute('data-line');
+        if (line) {
+          // Remove all active states
+          const activeItems = tocList.querySelectorAll('.toc-item-active');
+          for (const el of activeItems) {
+            el.classList.remove('toc-item-active');
+          }
+          // Add active to matching TOC item
+          const activeItem = tocList.querySelector<HTMLElement>(`.toc-item[data-line="${line}"]`);
+          if (activeItem) {
+            activeItem.classList.add('toc-item-active');
+            // Auto-scroll TOC sidebar to keep active item visible
+            activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+          }
+        }
+      }
+    }
+  }, {
+    root: null,        // viewport
+    rootMargin: '0px 0px -80% 0px',  // top 20% is the active zone
+    threshold: 0,
+  });
+
+  for (const el of headingEls) {
+    if (el.getAttribute('data-line')) {
+      tocObserver.observe(el);
+    }
+  }
+}
+
+function setupTocToggle(): void {
+  const tocToggle = document.getElementById('toc-toggle');
+  const closeBtn = document.querySelector<HTMLElement>('.toc-close-btn');
+  if (!tocToggle || !closeBtn) return;
+
+  tocToggle.addEventListener('click', () => {
+    document.body.classList.add('toc-visible');
+    const state = (vscode.getState() as Record<string, unknown>) || {};
+    vscode.setState({ ...state, tocVisible: true });
+  });
+
+  closeBtn.addEventListener('click', () => {
+    document.body.classList.remove('toc-visible');
+    const state = (vscode.getState() as Record<string, unknown>) || {};
+    vscode.setState({ ...state, tocVisible: false });
+  });
+}
+
+// Call once when webview loads
+setupTocToggle();
 
 function escapeForHtml(text: string): string {
   return text
@@ -454,6 +569,23 @@ window.addEventListener('message', async (event) => {
         applyColorSwatches();
       }
       applyScrollIfReady();
+      // TOC handling
+      if (message.tocEnabled !== false) {
+        buildToc(message.headings || [], message.tocMaxDepth ?? 3);
+        // Restore toggle state from webview state, or default to visible
+        if (document.body.classList.contains('toc-has-headings')) {
+          const savedState = vscode.getState() as Record<string, unknown> | null;
+          const tocVisible = savedState?.tocVisible;
+          if (tocVisible === false) {
+            document.body.classList.remove('toc-visible');
+          } else {
+            document.body.classList.add('toc-visible');
+          }
+        }
+      } else {
+        document.body.classList.remove('toc-visible');
+        document.body.classList.remove('toc-has-headings');
+      }
       break;
     }
     case 'scroll': {
