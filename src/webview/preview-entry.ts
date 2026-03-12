@@ -458,8 +458,8 @@ function buildToc(headings: TocHeading[], maxDepth: number): boolean {
     a.dataset.line = String(h.line);
     a.addEventListener('click', (e) => {
       e.preventDefault();
-      // Find target heading by data-line attribute
-      const target = document.querySelector<HTMLElement>(`[data-line="${h.line}"]`);
+      // Find target heading in content area (not in TOC sidebar)
+      const target = content?.querySelector<HTMLElement>(`[data-line="${h.line}"]`);
       if (!target) return;
 
       // Suppress Preview→Editor scroll sync during TOC scroll
@@ -473,7 +473,7 @@ function buildToc(headings: TocHeading[], maxDepth: number): boolean {
 
   // IntersectionObserver for current position highlighting
   const headingSelector = Array.from({ length: maxDepth }, (_, i) => `h${i + 1}`).join(',');
-  const headingEls = document.querySelectorAll<HTMLElement>(headingSelector);
+  const headingEls = content ? content.querySelectorAll<HTMLElement>(headingSelector) : [];
 
   let tocScrollTimer: ReturnType<typeof setTimeout> | undefined;
 
