@@ -2,7 +2,7 @@
   "name": "markdown-multi-tab-preview",
   "displayName": "Markdown Multi Tab Preview",
   "description": "Preview multiple Markdown files simultaneously with independent preview panels",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "publisher": "santkoh",
   "engines": {
     "vscode": "^1.109.0"
