@@ -425,10 +425,9 @@ interface TocHeading {
   line: number;
 }
 
-function buildToc(headings: TocHeading[], maxDepth: number): void {
+function buildToc(headings: TocHeading[], maxDepth: number): boolean {
   const tocList = document.getElementById('toc-list');
-  const tocToggle = document.getElementById('toc-toggle');
-  if (!tocList || !tocToggle) return;
+  if (!tocList) return false;
 
   // Cleanup previous IntersectionObserver
   if (tocObserver) {
@@ -445,7 +444,7 @@ function buildToc(headings: TocHeading[], maxDepth: number): void {
   if (filtered.length === 0) {
     document.body.classList.remove('toc-has-headings');
     document.body.classList.remove('toc-visible');
-    return;
+    return false;
   }
 
   document.body.classList.add('toc-has-headings');
@@ -455,9 +454,10 @@ function buildToc(headings: TocHeading[], maxDepth: number): void {
     a.className = `toc-item toc-item-h${h.depth}`;
     a.textContent = h.text;    // textContent for XSS prevention - DO NOT use innerHTML
     a.title = h.text;           // tooltip for truncated text
-    a.href = 'javascript:void(0)';
+    a.href = '#';
     a.dataset.line = String(h.line);
-    a.addEventListener('click', () => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
       // Find target heading by data-line attribute
       const target = document.querySelector<HTMLElement>(`[data-line="${h.line}"]`);
       if (!target) return;
@@ -475,24 +475,31 @@ function buildToc(headings: TocHeading[], maxDepth: number): void {
   const headingSelector = Array.from({ length: maxDepth }, (_, i) => `h${i + 1}`).join(',');
   const headingEls = document.querySelectorAll<HTMLElement>(headingSelector);
 
+  let tocScrollTimer: ReturnType<typeof setTimeout> | undefined;
+
   tocObserver = new IntersectionObserver((entries) => {
+    let lastIntersectingLine: string | null = null;
     for (const entry of entries) {
       if (entry.isIntersecting) {
         const line = entry.target.getAttribute('data-line');
-        if (line) {
-          // Remove all active states
-          const activeItems = tocList.querySelectorAll('.toc-item-active');
-          for (const el of activeItems) {
-            el.classList.remove('toc-item-active');
-          }
-          // Add active to matching TOC item
-          const activeItem = tocList.querySelector<HTMLElement>(`.toc-item[data-line="${line}"]`);
-          if (activeItem) {
-            activeItem.classList.add('toc-item-active');
-            // Auto-scroll TOC sidebar to keep active item visible
-            activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-          }
-        }
+        if (line) lastIntersectingLine = line;
+      }
+    }
+    if (lastIntersectingLine) {
+      // Remove all active states
+      const activeItems = tocList.querySelectorAll('.toc-item-active');
+      for (const el of activeItems) {
+        el.classList.remove('toc-item-active');
+      }
+      // Add active to matching TOC item
+      const activeItem = tocList.querySelector<HTMLElement>(`.toc-item[data-line="${lastIntersectingLine}"]`);
+      if (activeItem) {
+        activeItem.classList.add('toc-item-active');
+        // Debounce scrollIntoView to avoid competing smooth-scroll animations
+        clearTimeout(tocScrollTimer);
+        tocScrollTimer = setTimeout(() => {
+          activeItem.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }, 100);
       }
     }
   }, {
@@ -506,6 +513,8 @@ function buildToc(headings: TocHeading[], maxDepth: number): void {
       tocObserver.observe(el);
     }
   }
+
+  return true;
 }
 
 function setupTocToggle(): void {
@@ -571,9 +580,9 @@ window.addEventListener('message', async (event) => {
       applyScrollIfReady();
       // TOC handling
       if (message.tocEnabled !== false) {
-        buildToc(message.headings || [], message.tocMaxDepth ?? 3);
+        const hasHeadings = buildToc(message.headings || [], message.tocMaxDepth ?? 3);
         // Restore toggle state from webview state, or default to visible
-        if (document.body.classList.contains('toc-has-headings')) {
+        if (hasHeadings) {
           const savedState = vscode.getState() as Record<string, unknown> | null;
           const tocVisible = savedState?.tocVisible;
           if (tocVisible === false) {
@@ -583,6 +592,11 @@ window.addEventListener('message', async (event) => {
           }
         }
       } else {
+        // Cleanup observer when TOC is disabled
+        if (tocObserver) {
+          tocObserver.disconnect();
+          tocObserver = null;
+        }
         document.body.classList.remove('toc-visible');
         document.body.classList.remove('toc-has-headings');
       }
