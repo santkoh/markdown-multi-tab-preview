@@ -18,6 +18,7 @@ Preview multiple Markdown files simultaneously with independent preview panels. 
 - **Bidirectional Scroll Sync** — Editor and preview scroll positions stay in sync in both directions.
 - **Mermaid Diagrams** — Renders `mermaid` code blocks as diagrams with pan/zoom controls. Theme follows your VS Code color theme.
 - **Syntax Highlighting** — Code blocks are highlighted with [highlight.js](https://highlightjs.org/) and include a copy-to-clipboard button on hover.
+- **Outline Sidebar** — Collapsible sidebar showing document headings for quick navigation. Click a heading to scroll to it. Depth level is configurable.
 - **Color Swatch Decorator** — Displays inline color swatches next to color codes (Hex, RGB/RGBA, HSL/HSLA) in both code blocks and body text.
 - **Frontmatter Display** — YAML frontmatter is rendered as a labeled code block at the top of the preview.
 - **Task List Support** — `- [x]` and `- [ ]` items render as styled checkboxes.
@@ -49,6 +50,8 @@ Click the edit icon in the preview panel's title bar, or use the Command Palette
 | `mdMultiTabPreview.retainContextWhenHidden` | `boolean` | `true` | Keep preview state when the tab is hidden (disable to reduce memory usage) |
 | `mdMultiTabPreview.allowRemoteImages` | `boolean` | `true` | Allow loading remote images (`https://`) in preview |
 | `mdMultiTabPreview.colorDecorator` | `boolean` | `true` | Show color swatches next to color codes in preview |
+| `mdMultiTabPreview.toc.enabled` | `boolean` | `true` | Show Outline (heading navigation) sidebar in preview |
+| `mdMultiTabPreview.toc.maxDepth` | `number` | `3` | Maximum heading depth shown in the Outline (1–6) |
 
 ## Requirements
 

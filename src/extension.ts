@@ -11,7 +11,7 @@ function isMarkdownFile(document: vscode.TextDocument): boolean {
 
 /** Activate the extension: register commands, listeners, and auto-preview. */
 export function activate(context: vscode.ExtensionContext): void {
-  previewManager = new PreviewManager(context.extensionUri);
+  previewManager = new PreviewManager(context.extensionUri, context.workspaceState);
 
   // Track documents that already had auto-preview opened
   const autoOpened = new Set<string>();

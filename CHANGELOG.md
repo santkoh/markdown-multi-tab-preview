@@ -6,6 +6,19 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Outline sidebar** — collapsible sidebar showing document headings for quick
+  navigation. Click a heading to smooth-scroll to it. Configurable via
+  `mdMultiTabPreview.toc.enabled` and `mdMultiTabPreview.toc.maxDepth`.
+
+### Fixed
+
+- Fixed Mermaid error SVG (bomb icon) rendering at the top-right corner of the
+  page instead of being hidden when a diagram has a syntax error.
+
 ## [0.6.1] - 2026-03-09
 
 ### Fixed

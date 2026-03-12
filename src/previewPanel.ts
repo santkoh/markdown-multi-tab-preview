@@ -9,6 +9,7 @@ export class PreviewPanel {
   private disposables: vscode.Disposable[] = [];
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly extensionUri: vscode.Uri;
+  private readonly workspaceState: vscode.Memento;
   private readonly onDisposeEmitter = new vscode.EventEmitter<vscode.Uri>();
   public readonly onDispose = this.onDisposeEmitter.event;
   private isScrollingFromPreview = false;
@@ -28,9 +29,11 @@ export class PreviewPanel {
     document: vscode.TextDocument,
     extensionUri: vscode.Uri,
     viewColumn: vscode.ViewColumn,
+    workspaceState: vscode.Memento,
   ) {
     this.document = document;
     this.extensionUri = extensionUri;
+    this.workspaceState = workspaceState;
 
     const fileName = path.basename(document.uri.fsPath);
     const mediaUri = vscode.Uri.joinPath(extensionUri, 'media');
@@ -76,10 +79,14 @@ export class PreviewPanel {
       }
     }, null, this.disposables);
 
-    // Re-render when colorDecorator setting changes
+    // Re-render when colorDecorator or TOC settings change
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (this.isDisposed) return;
-      if (e.affectsConfiguration('mdMultiTabPreview.colorDecorator')) {
+      if (
+        e.affectsConfiguration('mdMultiTabPreview.colorDecorator') ||
+        e.affectsConfiguration('mdMultiTabPreview.toc.enabled') ||
+        e.affectsConfiguration('mdMultiTabPreview.toc.maxDepth')
+      ) {
         this.scheduleUpdate();
       }
     }, null, this.disposables);
@@ -98,12 +105,14 @@ export class PreviewPanel {
       }
     }, null, this.disposables);
 
-    // Preview → Editor scroll sync
+    // Preview → Editor message handling
     this.panel.webview.onDidReceiveMessage((message) => {
       if (message.type === 'ready') {
         this.update();
       } else if (message.type === 'scrollEditor' && typeof message.line === 'number') {
         this.scrollEditorToLine(message.line);
+      } else if (message.type === 'tocToggle' && typeof message.visible === 'boolean') {
+        void this.workspaceState.update('tocVisible', message.visible);
       }
     }, null, this.disposables);
 
@@ -168,17 +177,20 @@ export class PreviewPanel {
     if (this.isDisposed) return;
     this.isDirty = false;
     try {
-      const html = renderMarkdown(
+      const { html, headings } = renderMarkdown(
         this.document.getText(),
         this.panel.webview,
         this.document.uri
       );
+      const config = vscode.workspace.getConfiguration('mdMultiTabPreview');
       this.panel.webview.postMessage({
         type: 'update',
         html,
-        colorDecorator: vscode.workspace
-          .getConfiguration('mdMultiTabPreview')
-          .get<boolean>('colorDecorator', true),
+        headings,
+        colorDecorator: config.get<boolean>('colorDecorator', true),
+        tocEnabled: config.get<boolean>('toc.enabled', true),
+        tocMaxDepth: config.get<number>('toc.maxDepth', 3),
+        tocVisible: this.workspaceState.get<boolean>('tocVisible', false),
       });
     } catch (err) {
       console.error('Failed to update preview:', err);
@@ -209,6 +221,14 @@ export class PreviewPanel {
   <title>Preview</title>
 </head>
 <body>
+  <button id="toc-toggle" class="toc-toggle-btn" title="Show Outline"><svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v1.2H2V3zm0 3.4h9v1.2H2V6.4zm0 3.4h11v1.2H2V9.8zm0 3.4h7v1.2H2v-1.2z"/></svg></button>
+  <div id="toc-sidebar" class="toc-sidebar">
+    <div class="toc-header">
+      <span class="toc-title">OUTLINE</span>
+      <button class="toc-close-btn" title="Hide Outline"><svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor"><path d="M5.9 8l4.6 4.6-.7.7L4.5 8l5.3-5.3.7.7L5.9 8z"/></svg></button>
+    </div>
+    <nav id="toc-list" class="toc-list"></nav>
+  </div>
   <div id="content"></div>
   <script nonce="${nonce}" src="${jsUri}"></script>
 </body>

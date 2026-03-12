@@ -177,6 +177,9 @@ async function applyMermaid(): Promise<void> {
       el.replaceWith(container);
       applyPanZoom(container);
     } catch (err) {
+      // Mermaid leaves an error SVG in the DOM on render failure — remove it
+      document.getElementById('d' + id)?.remove();
+
       const errorDiv = document.createElement('div');
       errorDiv.className = 'mermaid-error';
       errorDiv.innerHTML = `
@@ -335,6 +338,11 @@ function applyColorSwatches(): void {
 let isScrollingFromEditor = false;
 let scrollFromEditorTimer: ReturnType<typeof setTimeout> | undefined;
 
+// TOC scroll sync flag (same pattern as isScrollingFromEditor)
+let isScrollingFromToc = false;
+let scrollFromTocTimer: ReturnType<typeof setTimeout> | undefined;
+let tocHighlightCleanup: (() => void) | null = null;
+
 // Mermaid async rendering coordination
 let pendingScrollLine: number | null = null;
 let isMermaidRendering = false;
@@ -346,7 +354,8 @@ function applyScrollIfReady(): void {
 }
 
 function executeScroll(line: number): void {
-  const elements = Array.from(document.querySelectorAll<HTMLElement>('[data-line]'));
+  // Scope to #content only — exclude TOC sidebar data-line elements
+  const elements = Array.from(content?.querySelectorAll<HTMLElement>('[data-line]') ?? []);
   if (elements.length === 0) return;
 
   // Parse and sort by line number
@@ -380,6 +389,9 @@ function executeScroll(line: number): void {
 }
 
 function scrollToLine(line: number, _totalLines: number): void {
+  // Don't interrupt TOC smooth scroll with Editor→Preview sync
+  if (isScrollingFromToc) return;
+
   isScrollingFromEditor = true;
   clearTimeout(scrollFromEditorTimer);
   scrollFromEditorTimer = setTimeout(() => { isScrollingFromEditor = false; }, 200);
@@ -388,31 +400,190 @@ function scrollToLine(line: number, _totalLines: number): void {
   applyScrollIfReady();
 }
 
+// Find the data-line element closest to viewport top (scoped to #content)
+function getNearestLineAtTop(): number | null {
+  const elements = content?.querySelectorAll<HTMLElement>('[data-line]') ?? [];
+  let closestLine: number | null = null;
+  let closestDist = Infinity;
+  for (const el of elements) {
+    const dist = Math.abs(el.getBoundingClientRect().top);
+    if (dist < closestDist) {
+      closestDist = dist;
+      closestLine = parseInt(el.getAttribute('data-line')!, 10);
+    }
+  }
+  return closestLine !== null && !isNaN(closestLine) ? closestLine : null;
+}
+
 // Preview → Editor scroll sync (element-based)
 let scrollDebounce: ReturnType<typeof setTimeout> | undefined;
 window.addEventListener('scroll', () => {
-  if (isScrollingFromEditor) return;
+  if (isScrollingFromEditor || isScrollingFromToc) return;
   clearTimeout(scrollDebounce);
   scrollDebounce = setTimeout(() => {
-    const elements = document.querySelectorAll<HTMLElement>('[data-line]');
-    if (elements.length === 0) return;
-
-    // Find the element closest to the viewport top
-    let closestLine = 0;
-    let closestDist = Infinity;
-    for (const el of elements) {
-      const rect = el.getBoundingClientRect();
-      const dist = Math.abs(rect.top);
-      if (dist < closestDist) {
-        closestDist = dist;
-        closestLine = parseInt(el.getAttribute('data-line')!, 10);
-      }
-    }
-    if (!isNaN(closestLine)) {
-      vscode.postMessage({ type: 'scrollEditor', line: closestLine });
+    const line = getNearestLineAtTop();
+    if (line !== null) {
+      vscode.postMessage({ type: 'scrollEditor', line });
     }
   }, 50);
 });
+
+interface TocHeading {
+  text: string;
+  depth: number;
+  line: number;
+}
+
+function buildToc(headings: TocHeading[], maxDepth: number): boolean {
+  const tocList = document.getElementById('toc-list');
+  if (!tocList) return false;
+
+  // Cleanup previous highlight listener
+  if (tocHighlightCleanup) {
+    tocHighlightCleanup();
+    tocHighlightCleanup = null;
+  }
+
+  // Filter by maxDepth
+  const filtered = headings.filter(h => h.depth <= maxDepth);
+
+  // Clear existing TOC items
+  tocList.replaceChildren();
+
+  if (filtered.length === 0) {
+    document.body.classList.remove('toc-has-headings');
+    document.body.classList.remove('toc-visible');
+    return false;
+  }
+
+  document.body.classList.add('toc-has-headings');
+
+  for (const h of filtered) {
+    const a = document.createElement('a');
+    a.className = `toc-item toc-item-h${h.depth}`;
+    a.textContent = h.text;    // textContent for XSS prevention - DO NOT use innerHTML
+    a.title = h.text;           // tooltip for truncated text
+    a.dataset.tocLine = String(h.line);
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      // Find target heading in content area (not in TOC sidebar)
+      const target = content?.querySelector<HTMLElement>(`[data-line="${h.line}"]`);
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      // Already near target — no scroll needed (avoids scrollend not firing)
+      if (Math.abs(rect.top) < 40) return;
+
+      isScrollingFromToc = true;
+      clearTimeout(scrollFromTocTimer);
+
+      const scrollTarget = window.scrollY + rect.top - 16;
+      window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+
+      // Use scrollend event to detect when smooth scroll finishes
+      const onScrollEnd = () => {
+        window.removeEventListener('scrollend', onScrollEnd);
+        clearTimeout(scrollFromTocTimer);
+        // Notify Editor of final position to prevent round-trip interference
+        const line = getNearestLineAtTop();
+        if (line !== null) {
+          vscode.postMessage({ type: 'scrollEditor', line });
+        }
+        scrollFromTocTimer = setTimeout(() => { isScrollingFromToc = false; }, 100);
+      };
+      window.addEventListener('scrollend', onScrollEnd, { once: true });
+
+      // Fallback timer in case scrollend doesn't fire
+      scrollFromTocTimer = setTimeout(() => {
+        window.removeEventListener('scrollend', onScrollEnd);
+        isScrollingFromToc = false;
+      }, 1500);
+    });
+    tocList.appendChild(a);
+  }
+
+  // Scroll-based current position highlighting
+  // Find the last heading above viewport top → that's the current section
+  const headingSelector = Array.from({ length: maxDepth }, (_, i) => `h${i + 1}`).join(',');
+  const ACTIVE_ZONE_OFFSET = 20; // px from viewport top
+  let rafId = 0;
+  let tocScrollTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function updateTocHighlight(): void {
+    if (!content) return;
+    const headingEls = content.querySelectorAll<HTMLElement>(headingSelector);
+    let activeLine: string | null = null;
+
+    for (const el of headingEls) {
+      const line = el.getAttribute('data-line');
+      if (!line) continue;
+      if (el.getBoundingClientRect().top <= ACTIVE_ZONE_OFFSET) {
+        activeLine = line;
+      }
+    }
+
+    // Update active class
+    const prev = tocList.querySelector('.toc-item-active');
+    const next = activeLine
+      ? tocList.querySelector<HTMLElement>(`.toc-item[data-toc-line="${activeLine}"]`)
+      : null;
+
+    if (prev === next) return; // no change
+
+    prev?.classList.remove('toc-item-active');
+    if (next) {
+      next.classList.add('toc-item-active');
+      // Scroll TOC sidebar only (not the window) to keep active item visible
+      clearTimeout(tocScrollTimer);
+      tocScrollTimer = setTimeout(() => {
+        const sidebar = tocList.closest('.toc-sidebar');
+        if (!sidebar) return;
+        const sidebarRect = sidebar.getBoundingClientRect();
+        const itemRect = next.getBoundingClientRect();
+        // Only scroll if item is outside the sidebar's visible area
+        if (itemRect.top < sidebarRect.top + 40 || itemRect.bottom > sidebarRect.bottom - 10) {
+          sidebar.scrollTop += (itemRect.top - sidebarRect.top) - sidebarRect.height / 3;
+        }
+      }, 100);
+    }
+  }
+
+  function onScroll(): void {
+    cancelAnimationFrame(rafId);
+    rafId = requestAnimationFrame(updateTocHighlight);
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  // Run once immediately to highlight current position
+  updateTocHighlight();
+
+  tocHighlightCleanup = () => {
+    window.removeEventListener('scroll', onScroll);
+    cancelAnimationFrame(rafId);
+    clearTimeout(tocScrollTimer);
+  };
+
+  return true;
+}
+
+function setupTocToggle(): void {
+  const tocToggle = document.getElementById('toc-toggle');
+  const closeBtn = document.querySelector<HTMLElement>('.toc-close-btn');
+  if (!tocToggle || !closeBtn) return;
+
+  tocToggle.addEventListener('click', () => {
+    document.body.classList.add('toc-visible');
+    vscode.postMessage({ type: 'tocToggle', visible: true });
+  });
+
+  closeBtn.addEventListener('click', () => {
+    document.body.classList.remove('toc-visible');
+    vscode.postMessage({ type: 'tocToggle', visible: false });
+  });
+}
+
+// Call once when webview loads
+setupTocToggle();
 
 function escapeForHtml(text: string): string {
   return text
@@ -454,6 +625,26 @@ window.addEventListener('message', async (event) => {
         applyColorSwatches();
       }
       applyScrollIfReady();
+      // TOC handling
+      if (message.tocEnabled !== false) {
+        const hasHeadings = buildToc(message.headings || [], message.tocMaxDepth ?? 3);
+        // Restore toggle state from extension workspaceState
+        if (hasHeadings) {
+          if (message.tocVisible === true) {
+            document.body.classList.add('toc-visible');
+          } else {
+            document.body.classList.remove('toc-visible');
+          }
+        }
+      } else {
+        // Cleanup highlight listener when TOC is disabled
+        if (tocHighlightCleanup) {
+          tocHighlightCleanup();
+          tocHighlightCleanup = null;
+        }
+        document.body.classList.remove('toc-visible');
+        document.body.classList.remove('toc-has-headings');
+      }
       break;
     }
     case 'scroll': {

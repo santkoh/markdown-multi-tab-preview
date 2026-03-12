@@ -18,6 +18,7 @@
 - **双方向スクロール同期** — エディタとプレビューのスクロール位置を双方向で同期します。
 - **Mermaid ダイアグラム** — `mermaid` コードブロックをダイアグラムとしてレンダリング。パン/ズーム操作にも対応。テーマは VS Code のカラーテーマに追従します。
 - **シンタックスハイライト** — コードブロックを [highlight.js](https://highlightjs.org/) でハイライト表示。ホバー時にコピーボタンも表示されます。
+- **Outline サイドバー** — ドキュメントの見出し一覧を折りたたみ可能なサイドバーに表示。クリックで該当箇所にスクロール。表示する見出しの深さも設定可能です。
 - **カラースウォッチ** — カラーコード（Hex, RGB/RGBA, HSL/HSLA）の横に色見本を表示。コードブロック内・本文テキストの両方に対応しています。
 - **フロントマター表示** — YAML フロントマターをプレビュー上部にラベル付きコードブロックとして表示します。
 - **タスクリスト** — `- [x]` / `- [ ]` をスタイル付きチェックボックスとして表示します。
@@ -49,6 +50,8 @@
 | `mdMultiTabPreview.retainContextWhenHidden` | `boolean` | `true` | タブ非表示時もプレビューの状態を保持（無効にするとメモリ使用量が減少） |
 | `mdMultiTabPreview.allowRemoteImages` | `boolean` | `true` | プレビューでリモート画像（`https://`）の読み込みを許可 |
 | `mdMultiTabPreview.colorDecorator` | `boolean` | `true` | カラーコードの横に色見本を表示 |
+| `mdMultiTabPreview.toc.enabled` | `boolean` | `true` | プレビューに Outline（見出しナビゲーション）サイドバーを表示 |
+| `mdMultiTabPreview.toc.maxDepth` | `number` | `3` | Outline に表示する見出しの最大レベル（1〜6） |
 
 ## 動作要件
 

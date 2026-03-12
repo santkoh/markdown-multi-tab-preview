@@ -4,6 +4,24 @@ import { escapeHtml } from './utils';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
+export interface TocHeading {
+  text: string;   // plain text (unescaped) — webview uses textContent for XSS safety
+  depth: number;  // 1-6
+  line: number;   // source line number
+}
+
+function extractPlainText(tokens: Tokens.Token[]): string {
+  return tokens.map(token => {
+    if ('tokens' in token && Array.isArray(token.tokens)) {
+      return extractPlainText(token.tokens);
+    }
+    if ('text' in token && typeof token.text === 'string') {
+      return token.text;
+    }
+    return token.raw ?? '';
+  }).join('');
+}
+
 function extractFrontmatter(markdown: string): { frontmatter: string | null; body: string; bodyStartLine: number } {
   const match = markdown.match(FRONTMATTER_RE);
   if (!match) return { frontmatter: null, body: markdown, bodyStartLine: 0 };
@@ -26,7 +44,7 @@ export function renderMarkdown(
   markdown: string,
   webview: vscode.Webview,
   documentUri: vscode.Uri
-): string {
+): { html: string; headings: TocHeading[] } {
   const docDir = vscode.Uri.joinPath(documentUri, '..');
   const { frontmatter, body, bodyStartLine } = extractFrontmatter(markdown);
 
@@ -150,8 +168,16 @@ export function renderMarkdown(
     cumLine += newlines;
   }
 
+  const headings: TocHeading[] = tokens
+    .filter((t): t is Tokens.Heading => t.type === 'heading')
+    .map(t => ({
+      text: extractPlainText(t.tokens),
+      depth: t.depth,
+      line: tokenLineMap.get(t) ?? 0,
+    }));
+
   const bodyHtml = marked.parser(tokens) as string;
 
   const frontmatterHtml = frontmatter ? renderFrontmatterHtml(frontmatter) : '';
-  return frontmatterHtml + bodyHtml;
+  return { html: frontmatterHtml + bodyHtml, headings };
 }
