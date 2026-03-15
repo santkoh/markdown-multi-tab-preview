@@ -6,6 +6,13 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.2] - 2026-03-16
+
+### Changed
+
+- Updated Mermaid from 11.12.3 to 11.13.0 (new diagram types, bug fixes).
+- Updated DOMPurify from 3.3.2 to 3.3.3 (Node.js engine compatibility fix).
+
 ## [0.7.1] - 2026-03-16
 
 ### Security
@@ -140,6 +147,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.7.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.6.0...v0.6.1
