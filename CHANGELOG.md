@@ -6,6 +6,12 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.3] - 2026-03-16
+
+### Added
+
+- Published to [Open VSX Registry](https://open-vsx.org/) in addition to VS Code Marketplace, expanding availability to VS Code-compatible editors.
+
 ## [0.7.2] - 2026-03-16
 
 ### Changed
@@ -147,6 +153,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.7.3]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.6.1...v0.7.0
