@@ -29,6 +29,9 @@ jobs:
 
       - run: pnpm run compile
 
+      - run: pnpm exec vsce package --no-dependencies
+        name: Validate VSIX packaging
+
   publish:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build
