@@ -53,3 +53,7 @@ jobs:
       - run: pnpm exec vsce publish --no-dependencies
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - run: pnpm exec ovsx publish --no-dependencies
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}

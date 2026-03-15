@@ -2,9 +2,9 @@
 name: release
 description: >
   Bump version, create a PR, merge, tag, and monitor the VS Code Marketplace
-  publish workflow. Use this skill when the user says "リリース", "publish",
-  "パブリッシュ", "Marketplace に出して", "バージョン上げて release",
-  or any variation of releasing/publishing a new version.
+  and Open VSX Registry publish workflow. Use this skill when the user says
+  "リリース", "publish", "パブリッシュ", "Marketplace に出して",
+  "バージョン上げて release", or any variation of releasing/publishing a new version.
 user-invokable: true
 argument-hint: "[patch|minor|major]"
 ---
@@ -97,7 +97,8 @@ git tag v<version>
 git push origin v<version>
 ```
 
-The `v*` tag triggers the `publish` job in `ci.yml`.
+The `v*` tag triggers the `publish` job in `ci.yml`, which publishes to
+both VS Code Marketplace and Open VSX Registry.
 
 ### 7. Monitor publish
 
