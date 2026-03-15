@@ -5,7 +5,7 @@
   "version": "0.7.2",
   "publisher": "santkoh",
   "engines": {
-    "vscode": "^1.109.0"
+    "vscode": "^1.110.0"
   },
   "license": "MIT",
   "repository": {
