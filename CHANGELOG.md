@@ -6,6 +6,12 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.4] - 2026-03-26
+
+### Security
+
+- Updated marked from 17.0.4 to 17.0.5 to fix ReDoS vulnerability (catastrophic backtracking in link/reflink label regex).
+
 ## [0.7.3] - 2026-03-16
 
 ### Added
@@ -153,6 +159,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.7.4]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.0...v0.7.1
