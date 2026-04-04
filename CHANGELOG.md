@@ -6,6 +6,13 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.5] - 2026-04-04
+
+### Security
+
+- Fixed 5 high/moderate vulnerabilities in transitive dependencies (`brace-expansion`, `lodash`, `lodash-es`, `picomatch`) via pnpm overrides.
+- Updated Mermaid from 11.13.0 to 11.14.0.
+
 ## [0.7.4] - 2026-03-26
 
 ### Security
@@ -159,6 +166,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.7.5]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.2...v0.7.3
 [0.7.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.1...v0.7.2
