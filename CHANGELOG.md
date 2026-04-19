@@ -6,6 +6,19 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Changed
+
+- **デフォルトテーマが Soft (角丸 + 柔らかい枠線) に変更**
+  - 従来の直線的なデザインに戻すには VS Code 設定で `mdMultiTabPreview.theme.preset` を `"classic"` に変更してください
+  - 角丸: テーブル・Mermaid・コードブロック・引用・frontmatter
+  - line-height / padding を微調整し可読性向上
+
+### Added
+
+- `mdMultiTabPreview.theme.preset` 設定 (`"soft"` | `"classic"`)
+
 ## [0.7.5] - 2026-04-04
 
 ### Security

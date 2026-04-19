@@ -96,13 +96,14 @@ export class PreviewPanel {
       }
     }, null, this.disposables);
 
-    // Re-render when colorDecorator or TOC settings change
+    // Re-render when colorDecorator, TOC, or theme settings change
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (this.isDisposed) return;
       if (
         e.affectsConfiguration('mdMultiTabPreview.colorDecorator') ||
         e.affectsConfiguration('mdMultiTabPreview.toc.enabled') ||
-        e.affectsConfiguration('mdMultiTabPreview.toc.maxDepth')
+        e.affectsConfiguration('mdMultiTabPreview.toc.maxDepth') ||
+        e.affectsConfiguration('mdMultiTabPreview.theme.preset')
       ) {
         this.scheduleUpdate();
       }
@@ -232,6 +233,7 @@ export class PreviewPanel {
         tocEnabled: config.get<boolean>('toc.enabled', true),
         tocMaxDepth: config.get<number>('toc.maxDepth', 3),
         tocVisible: this.workspaceState.get<boolean>('tocVisible', false),
+        themePreset: config.get<string>('theme.preset', 'soft'),
       });
     } catch (err) {
       console.error('Failed to update preview:', err);

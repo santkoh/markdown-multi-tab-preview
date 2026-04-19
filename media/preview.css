@@ -622,3 +622,107 @@ body.toc-has-headings:not(.toc-visible):hover .toc-toggle-btn {
 body.toc-visible .toc-toggle-btn {
   display: none;
 }
+
+/* ===== Theme: Classic ===== */
+body.theme-classic {
+  /* 既存 CSS がそのまま適用される（何もしない） */
+}
+
+/* ===== Theme: Soft ===== */
+body.theme-soft {
+  line-height: 1.7;
+}
+
+body.theme-soft blockquote {
+  border-radius: 8px;
+  padding: 8px 16px;
+  margin: 10px 0;
+}
+
+body.theme-soft blockquote blockquote {
+  padding: 4px 14px;
+}
+
+body.theme-soft pre {
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+
+body.theme-soft code {
+  border-radius: 5px;
+  padding: 3px 7px;
+}
+
+body.theme-soft .frontmatter {
+  border-radius: 8px;
+}
+
+body.theme-soft .frontmatter pre {
+  border-radius: 0 0 8px 8px;
+}
+
+/* Table: border-collapse: separate にして tr/th/td に border-radius */
+body.theme-soft table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--vscode-panel-border);
+  margin: 12px 0;
+}
+
+body.theme-soft th,
+body.theme-soft td {
+  border: none;
+  border-right: 1px solid var(--vscode-panel-border);
+  border-bottom: 1px solid var(--vscode-panel-border);
+  padding: 8px 14px;
+}
+
+body.theme-soft th:last-child,
+body.theme-soft td:last-child {
+  border-right: none;
+}
+
+body.theme-soft tr:last-child th,
+body.theme-soft tr:last-child td {
+  border-bottom: none;
+}
+
+body.theme-soft th {
+  background: var(--vscode-editorGroupHeader-tabsBackground);
+}
+
+/* Mermaid diagram */
+body.theme-soft .mermaid-diagram {
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--vscode-editor-background);
+  border: 1px solid var(--vscode-panel-border);
+}
+
+/* Mermaid error */
+body.theme-soft .mermaid-error {
+  border-radius: 8px;
+  padding: 14px;
+}
+
+/* HR */
+body.theme-soft hr {
+  border-top: 1px solid var(--vscode-panel-border);
+  opacity: 0.6;
+  margin: 2em 0;
+}
+
+/* Copy button: よりソフトに */
+body.theme-soft .copy-button {
+  border-radius: 5px;
+}
+
+/* Heading underline をより薄く (h1, h2) */
+body.theme-soft h1,
+body.theme-soft h2 {
+  border-bottom-color: var(--vscode-panel-border);
+  border-bottom-width: 1px;
+  opacity: 1;
+}
