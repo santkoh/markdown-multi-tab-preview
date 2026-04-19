@@ -104,6 +104,16 @@
           "minimum": 1,
           "maximum": 6,
           "description": "Outlineに表示する見出しの最大レベル（1〜6）"
+        },
+        "mdMultiTabPreview.theme.preset": {
+          "type": "string",
+          "enum": ["soft", "classic"],
+          "default": "soft",
+          "description": "プレビューの外観プリセット。soft: 角丸 + 柔らかい枠線（推奨）、classic: v0.7.5 までの直線的なデザイン",
+          "enumDescriptions": [
+            "soft: 角丸 + 柔らかい枠線（推奨）",
+            "classic: 従来デザイン"
+          ]
         }
       }
     }

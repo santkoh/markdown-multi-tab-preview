@@ -11,6 +11,9 @@ declare function acquireVsCodeApi(): {
 
 const vscode = acquireVsCodeApi();
 
+// Apply default theme class before first 'update' message arrives
+document.body.classList.add('theme-soft');
+
 function getTheme(): 'dark' | 'default' {
   return document.body.classList.contains('vscode-dark') ||
     document.body.classList.contains('vscode-high-contrast')
@@ -636,6 +639,10 @@ window.addEventListener('message', async (event) => {
   switch (message.type) {
     case 'update': {
       const currentVersion = ++renderVersion;
+      // Apply theme preset (default 'soft' when themePreset is undefined)
+      const preset = message.themePreset === 'classic' ? 'classic' : 'soft';
+      document.body.classList.remove('theme-soft', 'theme-classic');
+      document.body.classList.add(`theme-${preset}`);
       destroyAllPanzoom();
       if (content) {
         content.innerHTML = DOMPurify.sanitize(message.html, {
