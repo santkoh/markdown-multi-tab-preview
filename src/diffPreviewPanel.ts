@@ -2,29 +2,27 @@ import * as vscode from 'vscode';
 import * as nodePath from 'path';
 import { renderMarkdown } from './markdownRenderer';
 import { getNonce } from './utils';
-import { GitApi, Repository } from './gitApi';
+import { Repository } from './gitApi';
 import { parseUnifiedDiff } from './diffParser';
 
 export class DiffPreviewPanel {
   private readonly panel: vscode.WebviewPanel;
   private readonly document: vscode.TextDocument;
   private readonly extensionUri: vscode.Uri;
-  private readonly gitApi: GitApi;
   private readonly repo: Repository;
   private isWebviewReady = false;
   private isDisposed = false;
+  private refreshTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly disposables: vscode.Disposable[] = [];
 
   constructor(
     document: vscode.TextDocument,
     extensionUri: vscode.Uri,
     viewColumn: vscode.ViewColumn,
-    gitApi: GitApi,
     repo: Repository,
   ) {
     this.document = document;
     this.extensionUri = extensionUri;
-    this.gitApi = gitApi;
     this.repo = repo;
 
     const fileName = nodePath.basename(document.uri.fsPath);
@@ -61,6 +59,14 @@ export class DiffPreviewPanel {
       }
     }, null, this.disposables);
 
+    // Re-render when the tracked document is edited (debounced, keeps working tree pane fresh).
+    vscode.workspace.onDidChangeTextDocument((e) => {
+      if (this.isDisposed || !this.isWebviewReady) return;
+      if (e.document.uri.toString() !== this.document.uri.toString()) return;
+      if (this.refreshTimer) clearTimeout(this.refreshTimer);
+      this.refreshTimer = setTimeout(() => void this.update(), 300);
+    }, null, this.disposables);
+
     this.setHtml();
   }
 
@@ -72,6 +78,7 @@ export class DiffPreviewPanel {
   private cleanUp(): void {
     if (this.isDisposed) return;
     this.isDisposed = true;
+    if (this.refreshTimer) clearTimeout(this.refreshTimer);
     for (const d of this.disposables) d.dispose();
     this.disposables.length = 0;
   }

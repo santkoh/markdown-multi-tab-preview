@@ -69,13 +69,13 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.window.showErrorMessage('No Git repository found for this file.');
         return;
       }
-      new DiffPreviewPanel(
+      const diffPanel = new DiffPreviewPanel(
         editor.document,
         context.extensionUri,
         vscode.ViewColumn.Beside,
-        gitApi,
         repo,
       );
+      context.subscriptions.push({ dispose: () => diffPanel.dispose() });
     })
   );
 

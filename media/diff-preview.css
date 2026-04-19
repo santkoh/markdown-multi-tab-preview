@@ -52,18 +52,18 @@ body {
   flex: 1;
 }
 
-/* Diff highlight: added (right pane) */
+/* Diff highlight: added (right pane) — theme-adaptive via VS Code tokens */
 .diff-added {
-  background: rgba(80, 200, 120, 0.15);
-  border-left: 3px solid #2ea043;
+  background: var(--vscode-diffEditor-insertedTextBackground, rgba(80, 200, 120, 0.15));
+  border-left: 3px solid var(--vscode-gitDecoration-addedResourceForeground, #2ea043);
   padding-left: 8px;
   margin-left: -11px;
 }
 
-/* Diff highlight: removed (left pane) */
+/* Diff highlight: removed (left pane) — theme-adaptive via VS Code tokens */
 .diff-removed {
-  background: rgba(255, 80, 80, 0.12);
-  border-left: 3px solid #cf222e;
+  background: var(--vscode-diffEditor-removedTextBackground, rgba(255, 80, 80, 0.12));
+  border-left: 3px solid var(--vscode-gitDecoration-deletedResourceForeground, #cf222e);
   padding-left: 8px;
   margin-left: -11px;
 }

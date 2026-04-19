@@ -97,7 +97,8 @@ theme:
 
 ### HTML エンティティ / URL は除外
 - HTML entity: `&#xff;` (除外: `&` が先行)
-- URL fragment: https://example.com/#section (除外: `e` 先行)
+- URL fragment: https://example.com/#fff (除外: `m` 先行、`/` 経由でも単語直後は swatch 対象外)
+- URL fragment: https://example.com/#3af (同上、`#` の直前が単語文字)
 
 ### 単語境界
 - the#fff (除外: `e` が `#` の直前にある)

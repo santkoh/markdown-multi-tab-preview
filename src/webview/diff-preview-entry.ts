@@ -10,7 +10,8 @@ const basePane = document.getElementById('base-content') as HTMLElement;
 const currentPane = document.getElementById('current-content') as HTMLElement;
 
 const DOMPUR_OPTIONS: DOMPurify.Config = {
-  FORBID_TAGS: ['form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+  FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+  FORBID_ATTR: ['style'],
 };
 
 /**
@@ -32,20 +33,21 @@ function applyDiffClasses(
     .filter(item => !isNaN(item.line))
     .sort((a, b) => a.line - b.line);
 
+  // Pre-filter matching diff lines and sort once, then scan linearly with a pointer.
+  const matchingLines = Array.from(diffMap.entries())
+    .filter(([, status]) => status === expectedStatus)
+    .map(([line]) => line)
+    .sort((a, b) => a - b);
+
+  let cursor = 0;
   for (let i = 0; i < items.length; i++) {
     const start = items[i].line;
     const end = i + 1 < items.length ? items[i + 1].line : Infinity;
 
-    // Check if any diff line in [start, end) has the expected status.
-    let match = false;
-    for (const [diffLine, status] of diffMap) {
-      if (diffLine >= start && diffLine < end && status === expectedStatus) {
-        match = true;
-        break;
-      }
+    while (cursor < matchingLines.length && matchingLines[cursor] < start) {
+      cursor++;
     }
-
-    if (match) {
+    if (cursor < matchingLines.length && matchingLines[cursor] < end) {
       items[i].el.classList.add(`diff-${expectedStatus}`);
     }
   }

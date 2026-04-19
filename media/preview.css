@@ -663,6 +663,12 @@ body.theme-soft code {
   padding: 3px 7px;
 }
 
+/* Reset the soft inline-code overrides inside fenced code blocks */
+body.theme-soft pre code {
+  border-radius: 0;
+  padding: 0;
+}
+
 body.theme-soft .frontmatter {
   border-radius: 8px;
 }

@@ -14,7 +14,7 @@ const ALERT_LABELS = {
 type AlertType = keyof typeof ALERT_LABELS;
 const ALERT_MARKER_RE = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][^\S\r\n]*(?:\r?\n|$)/;
 
-function detectGfmAlert(token: Tokens.Blockquote): AlertType | null {
+function consumeGfmAlertMarker(token: Tokens.Blockquote): AlertType | null {
   const firstBlock = token.tokens[0];
   if (!firstBlock || firstBlock.type !== 'paragraph') return null;
   const para = firstBlock as Tokens.Paragraph;
@@ -166,7 +166,7 @@ export function renderMarkdown(
 
       blockquote(token: Tokens.Blockquote): string {
         const line = tokenLineMap.get(token) ?? '';
-        const alertType = detectGfmAlert(token);
+        const alertType = consumeGfmAlertMarker(token);
         const body = this.parser.parse(token.tokens);
         if (alertType) {
           const cls = `alert alert-${alertType.toLowerCase()}`;

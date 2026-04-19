@@ -40,10 +40,10 @@ export function parseUnifiedDiff(diff: string): DiffResult {
 
     if (!inHunk) continue;
 
-    if (raw.startsWith('---') || raw.startsWith('+++')) {
-      // file header lines inside diff output — skip
-      continue;
-    }
+    // Note: `---` / `+++` file-header lines appear only before any hunk header,
+    // so they are already filtered by the !inHunk guard above. Matching them
+    // inside a hunk is unsafe because content lines like `---` (Markdown <hr>
+    // or frontmatter fences) appear as `----` in unified diff form.
 
     if (raw.startsWith('-')) {
       // Removed line: exists in old file, not in new.

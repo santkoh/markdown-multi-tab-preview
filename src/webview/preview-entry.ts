@@ -646,7 +646,8 @@ window.addEventListener('message', async (event) => {
       destroyAllPanzoom();
       if (content) {
         content.innerHTML = DOMPurify.sanitize(message.html, {
-          FORBID_TAGS: ['form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+          FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+          FORBID_ATTR: ['style'],
         });
       }
       // Re-initialize mermaid with current theme
