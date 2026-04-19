@@ -40,6 +40,28 @@ function renderFrontmatterHtml(yaml: string): string {
 </div>\n`;
 }
 
+// Lexer options must match renderMarkdown so slugs resolve against the same heading text.
+export function extractHeadings(markdown: string): TocHeading[] {
+  const { body, bodyStartLine } = extractFrontmatter(markdown);
+  const marked = new Marked({ gfm: true });
+  const tokens = marked.lexer(body);
+
+  let cumLine = bodyStartLine;
+  const lineMap = new WeakMap<object, number>();
+  for (const token of tokens) {
+    lineMap.set(token, cumLine);
+    cumLine += (token.raw.match(/\n/g) ?? []).length;
+  }
+
+  return tokens
+    .filter((t): t is Tokens.Heading => t.type === 'heading')
+    .map(t => ({
+      text: extractPlainText(t.tokens),
+      depth: t.depth,
+      line: lineMap.get(t) ?? 0,
+    }));
+}
+
 export function renderMarkdown(
   markdown: string,
   webview: vscode.Webview,

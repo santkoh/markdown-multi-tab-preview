@@ -4,7 +4,8 @@ body {
   font-family: var(--vscode-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif);
   font-size: var(--vscode-font-size, 14px);
   line-height: 1.6;
-  padding: 16px 24px;
+  /* padding-bottom mirrors editor.scrollBeyondLastLine so any heading can reach the viewport top */
+  padding: 16px 24px 80vh;
   margin: 0;
   max-width: 960px;
 }

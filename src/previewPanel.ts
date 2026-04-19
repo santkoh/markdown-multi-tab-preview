@@ -3,6 +3,8 @@ import * as path from 'path';
 import { renderMarkdown } from './markdownRenderer';
 import { getNonce } from './utils';
 
+export type LinkClickHandler = (sourceUri: vscode.Uri, href: string) => void;
+
 export class PreviewPanel {
   private panel: vscode.WebviewPanel;
   private document: vscode.TextDocument;
@@ -10,12 +12,15 @@ export class PreviewPanel {
   private debounceTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly extensionUri: vscode.Uri;
   private readonly workspaceState: vscode.Memento;
+  private readonly onLinkClickHandler: LinkClickHandler | undefined;
   private readonly onDisposeEmitter = new vscode.EventEmitter<vscode.Uri>();
   public readonly onDispose = this.onDisposeEmitter.event;
   private isScrollingFromPreview = false;
   private scrollFromPreviewTimer: ReturnType<typeof setTimeout> | undefined;
   private isDisposed = false;
   private isDirty = false;
+  private isWebviewReady = false;
+  private pendingScrollLine = 0;
 
   public get documentUri(): vscode.Uri {
     return this.document.uri;
@@ -30,10 +35,22 @@ export class PreviewPanel {
     extensionUri: vscode.Uri,
     viewColumn: vscode.ViewColumn,
     workspaceState: vscode.Memento,
+    onLinkClick?: LinkClickHandler,
   ) {
     this.document = document;
     this.extensionUri = extensionUri;
     this.workspaceState = workspaceState;
+    this.onLinkClickHandler = onLinkClick;
+
+    // Capture the editor's current scroll BEFORE creating the webview panel,
+    // since same-column creation hides the editor from visibleTextEditors.
+    const sourceEditor = vscode.window.visibleTextEditors.find(
+      (e) => e.document.uri.toString() === document.uri.toString()
+    );
+    const initialLine = sourceEditor?.visibleRanges[0]?.start.line ?? 0;
+    if (initialLine > 0) {
+      this.pendingScrollLine = initialLine;
+    }
 
     const fileName = path.basename(document.uri.fsPath);
     const mediaUri = vscode.Uri.joinPath(extensionUri, 'media');
@@ -108,15 +125,39 @@ export class PreviewPanel {
     // Preview → Editor message handling
     this.panel.webview.onDidReceiveMessage((message) => {
       if (message.type === 'ready') {
+        this.isWebviewReady = true;
         this.update();
+        if (this.pendingScrollLine > 0) {
+          this.postScroll(this.pendingScrollLine);
+          this.pendingScrollLine = 0;
+        }
       } else if (message.type === 'scrollEditor' && typeof message.line === 'number') {
         this.scrollEditorToLine(message.line);
       } else if (message.type === 'tocToggle' && typeof message.visible === 'boolean') {
         void this.workspaceState.update('tocVisible', message.visible);
+      } else if (message.type === 'linkClick' && typeof message.href === 'string') {
+        this.onLinkClickHandler?.(this.document.uri, message.href);
       }
     }, null, this.disposables);
 
     this.setHtml();
+  }
+
+  public requestScroll(line: number): void {
+    if (!Number.isFinite(line) || line <= 0) return;
+    if (this.isWebviewReady) {
+      this.postScroll(line);
+    } else {
+      this.pendingScrollLine = line;
+    }
+  }
+
+  private postScroll(line: number): void {
+    this.panel.webview.postMessage({
+      type: 'scroll',
+      line,
+      totalLines: this.document.lineCount,
+    });
   }
 
   public reveal(viewColumn?: vscode.ViewColumn): void {

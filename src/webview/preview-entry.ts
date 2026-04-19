@@ -594,6 +594,16 @@ function escapeForHtml(text: string): string {
 
 const content = document.getElementById('content');
 
+// Handle link clicks in preview content
+content?.addEventListener('click', (e: MouseEvent) => {
+  const anchor = (e.target as HTMLElement).closest('a');
+  if (!anchor) return;
+  const href = anchor.getAttribute('href');
+  if (!href || href.startsWith('#')) return;
+  e.preventDefault();
+  vscode.postMessage({ type: 'linkClick', href });
+});
+
 let renderVersion = 0;
 
 window.addEventListener('message', async (event) => {
