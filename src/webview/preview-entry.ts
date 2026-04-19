@@ -84,7 +84,7 @@ function applyPanZoom(container: HTMLElement): void {
   // Toggle button (always visible on hover)
   const btnToggle = document.createElement('button');
   btnToggle.className = 'mermaid-btn';
-  btnToggle.title = 'Toggle Pan/Zoom Mode';
+  btnToggle.title = 'Toggle Pan/Zoom Mode (Cmd/Ctrl+Wheel to zoom)';
   btnToggle.appendChild(createSvgIcon(ICON_MOVE));
 
   const btnZoomIn = document.createElement('button');
@@ -108,17 +108,27 @@ function applyPanZoom(container: HTMLElement): void {
   toolbar.appendChild(btnReset);
   container.appendChild(toolbar);
 
+  // Figma-like wheel handler: modifier key → zoom, plain wheel → page scroll
+  const onWheel = (e: WheelEvent): void => {
+    if (!isActive) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      pz.zoomWithWheel(e);
+    }
+    // No modifier → do not preventDefault, let browser handle page scroll
+  };
+
   function enterZoomMode(): void {
     isActive = true;
     pz.setOptions({ disablePan: false });
-    container.addEventListener('wheel', pz.zoomWithWheel, { passive: false });
+    container.addEventListener('wheel', onWheel, { passive: false });
     container.classList.add('mermaid-zoom-active');
     btnToggle.classList.add('mermaid-btn-active');
   }
 
   function exitZoomMode(): void {
     pz.setOptions({ disablePan: true });
-    container.removeEventListener('wheel', pz.zoomWithWheel);
+    container.removeEventListener('wheel', onWheel);
     container.classList.remove('mermaid-zoom-active');
     btnToggle.classList.remove('mermaid-btn-active');
     isActive = false;
@@ -146,7 +156,7 @@ function applyPanZoom(container: HTMLElement): void {
 
   // Cleanup
   panzoomCleanups.push(() => {
-    container.removeEventListener('wheel', pz.zoomWithWheel);
+    container.removeEventListener('wheel', onWheel);
     document.removeEventListener('mousedown', onDocumentMouseDown);
     pz.destroy();
   });
