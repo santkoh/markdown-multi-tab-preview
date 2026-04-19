@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-04-19
+
 ### Added
 
 - **Rich Diff Preview** (#57) — 新コマンド `mdMultiTabPreview.showDiffPreview` (エディタタイトルの `git-compare` アイコン) を追加。Side-by-side で HEAD 版と Working Tree 版のレンダリング済み Markdown を比較。変更ブロックを theme-adaptive な色（`--vscode-diffEditor-insertedTextBackground` / `--vscode-gitDecoration-addedResourceForeground` 等）でハイライト、両パネルを比率でスクロール同期。
@@ -24,10 +26,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - line-height / padding を微調整し可読性向上
 - **Blockquote の左側アクセント帯を背景カードと一体化** (Soft テーマ)
   - 従来は浮いた `::before` 要素で描画していた帯を削除し、カードの `border-left` として統合。違和感を解消
+  - 通常の Blockquote にも Note と同じ配色（青アクセント + うっすら水色背景）を適用し視覚的統一
   - Classic テーマは従来の挙動を維持
 - **テーブルにゼブラストライプとホバーハイライト** (Soft テーマ)
   - 偶数行の背景色が交互に表示され、行数の多いテーブルでも行の追跡が容易に
   - ホバーで行全体が強調される
+  - ヘッダーは small-caps タイポグラフィ + 強 tint background + 2px bottom border で本文と明確に分離
 - **Mermaid Pan/Zoom UX を Figma ライクに変更** (#54)
   - Pan/Zoom モード ON 時でも素の wheel はページ縦スクロールを通過させる
   - ズームは Cmd (Mac) / Ctrl + wheel に限定
@@ -204,6 +208,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.8.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.5...v0.8.0
 [0.7.5]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.3...v0.7.4
 [0.7.3]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.2...v0.7.3
