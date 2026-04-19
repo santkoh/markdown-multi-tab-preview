@@ -784,19 +784,19 @@ body.theme-soft h2 {
 
 /* ===== GFM Alerts (NOTE / TIP / IMPORTANT / WARNING / CAUTION) ===== */
 
-/* Color tokens — light (subtle tint: うっすら colored) */
-blockquote.alert-note      { --alert-fg: #0969da; --alert-bg: rgba(9, 105, 218, 0.10); }
-blockquote.alert-tip       { --alert-fg: #1a7f37; --alert-bg: rgba(126, 188, 73, 0.14); }
-blockquote.alert-important { --alert-fg: #8250df; --alert-bg: rgba(130, 80, 223, 0.10); }
-blockquote.alert-warning   { --alert-fg: #9a6700; --alert-bg: rgba(212, 167, 44, 0.14); }
-blockquote.alert-caution   { --alert-fg: #cf222e; --alert-bg: rgba(207, 34, 46, 0.10); }
+/* Color tokens — light (clearly tinted backgrounds: 水色 / 黄緑 / 薄紫 / 金色 / 薄赤) */
+blockquote.alert-note      { --alert-fg: #0969da; --alert-bg: rgba(88, 166, 255, 0.18); }
+blockquote.alert-tip       { --alert-fg: #1a7f37; --alert-bg: rgba(163, 207, 102, 0.22); }
+blockquote.alert-important { --alert-fg: #8250df; --alert-bg: rgba(163, 113, 247, 0.18); }
+blockquote.alert-warning   { --alert-fg: #9a6700; --alert-bg: rgba(224, 188, 80, 0.28); }
+blockquote.alert-caution   { --alert-fg: #cf222e; --alert-bg: rgba(248, 113, 113, 0.18); }
 
-/* Color tokens — dark */
-body.vscode-dark blockquote.alert-note      { --alert-fg: #58a6ff; --alert-bg: rgba(88, 166, 255, 0.14); }
-body.vscode-dark blockquote.alert-tip       { --alert-fg: #3fb950; --alert-bg: rgba(147, 197, 93, 0.18); }
-body.vscode-dark blockquote.alert-important { --alert-fg: #a371f7; --alert-bg: rgba(163, 113, 247, 0.16); }
-body.vscode-dark blockquote.alert-warning   { --alert-fg: #d29922; --alert-bg: rgba(224, 188, 80, 0.18); }
-body.vscode-dark blockquote.alert-caution   { --alert-fg: #f85149; --alert-bg: rgba(248, 113, 113, 0.14); }
+/* Color tokens — dark (more saturated so the tint is clearly readable) */
+body.vscode-dark blockquote.alert-note      { --alert-fg: #58a6ff; --alert-bg: rgba(88, 166, 255, 0.22); }
+body.vscode-dark blockquote.alert-tip       { --alert-fg: #3fb950; --alert-bg: rgba(163, 207, 102, 0.22); }
+body.vscode-dark blockquote.alert-important { --alert-fg: #a371f7; --alert-bg: rgba(163, 113, 247, 0.22); }
+body.vscode-dark blockquote.alert-warning   { --alert-fg: #d29922; --alert-bg: rgba(224, 188, 80, 0.22); }
+body.vscode-dark blockquote.alert-caution   { --alert-fg: #f85149; --alert-bg: rgba(248, 113, 113, 0.22); }
 
 /* High-contrast */
 body.vscode-high-contrast blockquote.alert-note      { --alert-fg: #4da3ff; --alert-bg: transparent; }
@@ -822,30 +822,14 @@ body.theme-soft blockquote.alert {
   border-left-color: var(--alert-fg);
 }
 
-/* Alert title + icon */
+/* Alert title — text only, colored. No icon. */
 .alert-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
   margin: 0 0 6px 0;
   color: var(--alert-fg);
   font-weight: 600;
   font-size: 0.95em;
   letter-spacing: 0.01em;
 }
-
-.alert-title::before {
-  display: inline-block;
-  flex-shrink: 0;
-  font-size: 1.1em;
-  line-height: 1;
-}
-
-.alert-note .alert-title::before      { content: 'ⓘ'; }
-.alert-tip .alert-title::before       { content: '✦'; }
-.alert-important .alert-title::before { content: '◆'; }
-.alert-warning .alert-title::before   { content: '⚠'; }
-.alert-caution .alert-title::before   { content: '⛔'; }
 
 /* Trim trailing margin so the bottom padding of the alert card is consistent */
 .alert > :last-child {
