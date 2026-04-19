@@ -216,3 +216,21 @@ These should NOT show swatches:
 - 5-digit hex: #12345
 - 7-digit hex: #1234567
 - CSS comment: /* #aabbcc */  (should show in code block though)
+
+## 15. GitHub Reference Keyword Exclusion (new)
+
+Keyword + space + `#xxx` パターンは色ではなく GitHub 参照とみなし、swatch を表示しない。
+
+- Issue #123, PR #456, fix #789
+- closes #42, resolves #1, see #101
+- PR #4e1 (`e` を含むが、キーワード直後のため除外)
+- [#123](https://example.com) や [#3af](https://example.com) もリンク内で除外
+
+## 16. Pure-numeric 3/4-digit Hex Exclusion (new)
+
+3/4 桁 hex は a-f を 1 文字以上含まない限り swatch 非表示。6/8 桁はそのまま表示。
+
+- `#333` / `#000` / `#999` → 非表示（純数字 3 桁）
+- `#1234` → 非表示（純数字 4 桁）
+- `#333333` / `#000000` → 表示（6 桁は全数字 OK）
+- `#3af` / `#abc` → 表示（a-f 1 文字以上）

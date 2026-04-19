@@ -14,10 +14,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   - 従来の直線的なデザインに戻すには VS Code 設定で `mdMultiTabPreview.theme.preset` を `"classic"` に変更してください
   - 角丸: テーブル・Mermaid・コードブロック・引用・frontmatter
   - line-height / padding を微調整し可読性向上
+- **Blockquote の左側アクセント帯を背景カードと一体化** (Soft テーマ)
+  - 従来は浮いた `::before` 要素で描画していた帯を削除し、カードの `border-left` として統合。違和感を解消
+  - Classic テーマは従来の挙動を維持
+- **テーブルにゼブラストライプとホバーハイライト** (Soft テーマ)
+  - 偶数行の背景色が交互に表示され、行数の多いテーブルでも行の追跡が容易に
+  - ホバーで行全体が強調される
 
 ### Added
 
 - `mdMultiTabPreview.theme.preset` 設定 (`"soft"` | `"classic"`)
+- **GFM Alerts サポート** — `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]` の 5 種類のアラートを色付きでレンダリング
+  - 背景色とアクセント帯が種類ごとに切り替わる (青 / 緑 / 紫 / 黄 / 赤)
+  - Light / Dark / High Contrast の各テーマに対応した配色
 
 ## [0.7.5] - 2026-04-04
 

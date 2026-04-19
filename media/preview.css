@@ -633,14 +633,24 @@ body.theme-soft {
   line-height: 1.7;
 }
 
+/* Soft theme blockquote: unify the left accent with the outer card (no floating bar) */
 body.theme-soft blockquote {
+  border: 1px solid var(--vscode-panel-border);
+  border-left-width: 4px;
+  border-left-color: var(--vscode-textBlockQuote-border);
   border-radius: 8px;
-  padding: 8px 16px;
-  margin: 10px 0;
+  padding: 12px 18px;
+  margin: 12px 0;
+}
+
+body.theme-soft blockquote::before {
+  content: none;
 }
 
 body.theme-soft blockquote blockquote {
-  padding: 4px 14px;
+  margin: 10px 0;
+  padding: 8px 14px;
+  border-width: 1px 1px 1px 3px;
 }
 
 body.theme-soft pre {
@@ -693,6 +703,27 @@ body.theme-soft th {
   background: var(--vscode-editorGroupHeader-tabsBackground);
 }
 
+/* Zebra-striped rows (soft theme) */
+body.theme-soft tbody tr:nth-child(even) td {
+  background: rgba(127, 127, 127, 0.06);
+}
+
+body.vscode-dark.theme-soft tbody tr:nth-child(even) td {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+body.vscode-light.theme-soft tbody tr:nth-child(even) td {
+  background: rgba(0, 0, 0, 0.025);
+}
+
+body.theme-soft tbody tr {
+  transition: background-color 0.12s ease;
+}
+
+body.theme-soft tbody tr:hover td {
+  background: var(--vscode-list-hoverBackground, rgba(127, 127, 127, 0.1));
+}
+
 /* Mermaid diagram */
 body.theme-soft .mermaid-diagram {
   border-radius: 10px;
@@ -725,4 +756,72 @@ body.theme-soft h2 {
   border-bottom-color: var(--vscode-panel-border);
   border-bottom-width: 1px;
   opacity: 1;
+}
+
+/* ===== GFM Alerts (NOTE / TIP / IMPORTANT / WARNING / CAUTION) ===== */
+
+/* Color tokens — light */
+blockquote.alert-note      { --alert-fg: #0969da; --alert-bg: rgba(9, 105, 218, 0.08); }
+blockquote.alert-tip       { --alert-fg: #1a7f37; --alert-bg: rgba(26, 127, 55, 0.08); }
+blockquote.alert-important { --alert-fg: #8250df; --alert-bg: rgba(130, 80, 223, 0.08); }
+blockquote.alert-warning   { --alert-fg: #9a6700; --alert-bg: rgba(154, 103, 0, 0.08); }
+blockquote.alert-caution   { --alert-fg: #cf222e; --alert-bg: rgba(207, 34, 46, 0.08); }
+
+/* Color tokens — dark */
+body.vscode-dark blockquote.alert-note      { --alert-fg: #58a6ff; --alert-bg: rgba(56, 139, 253, 0.14); }
+body.vscode-dark blockquote.alert-tip       { --alert-fg: #3fb950; --alert-bg: rgba(46, 160, 67, 0.14); }
+body.vscode-dark blockquote.alert-important { --alert-fg: #a371f7; --alert-bg: rgba(137, 87, 229, 0.16); }
+body.vscode-dark blockquote.alert-warning   { --alert-fg: #d29922; --alert-bg: rgba(187, 128, 9, 0.16); }
+body.vscode-dark blockquote.alert-caution   { --alert-fg: #f85149; --alert-bg: rgba(248, 81, 73, 0.16); }
+
+/* High-contrast */
+body.vscode-high-contrast blockquote.alert-note      { --alert-fg: #4da3ff; --alert-bg: transparent; }
+body.vscode-high-contrast blockquote.alert-tip       { --alert-fg: #4ec26a; --alert-bg: transparent; }
+body.vscode-high-contrast blockquote.alert-important { --alert-fg: #b387f7; --alert-bg: transparent; }
+body.vscode-high-contrast blockquote.alert-warning   { --alert-fg: #e5ad2c; --alert-bg: transparent; }
+body.vscode-high-contrast blockquote.alert-caution   { --alert-fg: #ff6b61; --alert-bg: transparent; }
+
+/* Apply the color tokens to the alert container */
+blockquote.alert {
+  background: var(--alert-bg);
+}
+
+/* Classic theme: colorize the existing floating ::before bar */
+blockquote.alert::before {
+  background: var(--alert-fg);
+}
+
+/* Soft theme: colorize the unified border-left (the floating bar is already hidden) */
+body.theme-soft blockquote.alert {
+  border-left-color: var(--alert-fg);
+}
+
+/* Alert title + icon */
+.alert-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 6px 0;
+  color: var(--alert-fg);
+  font-weight: 600;
+  font-size: 0.95em;
+  letter-spacing: 0.01em;
+}
+
+.alert-title::before {
+  display: inline-block;
+  flex-shrink: 0;
+  font-size: 1.1em;
+  line-height: 1;
+}
+
+.alert-note .alert-title::before      { content: 'ⓘ'; }
+.alert-tip .alert-title::before       { content: '✦'; }
+.alert-important .alert-title::before { content: '◆'; }
+.alert-warning .alert-title::before   { content: '⚠'; }
+.alert-caution .alert-title::before   { content: '⛔'; }
+
+/* Trim trailing margin so the bottom padding of the alert card is consistent */
+.alert > :last-child {
+  margin-bottom: 0;
 }
