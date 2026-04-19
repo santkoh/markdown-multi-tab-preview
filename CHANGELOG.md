@@ -6,6 +6,44 @@ documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- **Rich Diff Preview** (#57) — 新コマンド `mdMultiTabPreview.showDiffPreview` (エディタタイトルの `git-compare` アイコン) を追加。Side-by-side で HEAD 版と Working Tree 版のレンダリング済み Markdown を比較。変更ブロックを theme-adaptive な色（`--vscode-diffEditor-insertedTextBackground` / `--vscode-gitDecoration-addedResourceForeground` 等）でハイライト、両パネルを比率でスクロール同期。
+- `mdMultiTabPreview.theme.preset` 設定 (`"soft"` | `"classic"`)
+- **GFM Alerts サポート** — `> [!NOTE]`, `> [!TIP]`, `> [!IMPORTANT]`, `> [!WARNING]`, `> [!CAUTION]` の 5 種類のアラートを色付きでレンダリング
+  - 背景色とアクセント帯が種類ごとに切り替わる (青 / 緑 / 紫 / 黄 / 赤)
+  - Light / Dark / High Contrast の各テーマに対応した配色
+
+### Changed
+
+- **デフォルトテーマが Soft (角丸 + 柔らかい枠線) に変更**
+  - 従来の直線的なデザインに戻すには VS Code 設定で `mdMultiTabPreview.theme.preset` を `"classic"` に変更してください
+  - 角丸: テーブル・Mermaid・コードブロック・引用・frontmatter
+  - line-height / padding を微調整し可読性向上
+- **Blockquote の左側アクセント帯を背景カードと一体化** (Soft テーマ)
+  - 従来は浮いた `::before` 要素で描画していた帯を削除し、カードの `border-left` として統合。違和感を解消
+  - Classic テーマは従来の挙動を維持
+- **テーブルにゼブラストライプとホバーハイライト** (Soft テーマ)
+  - 偶数行の背景色が交互に表示され、行数の多いテーブルでも行の追跡が容易に
+  - ホバーで行全体が強調される
+- **Mermaid Pan/Zoom UX を Figma ライクに変更** (#54)
+  - Pan/Zoom モード ON 時でも素の wheel はページ縦スクロールを通過させる
+  - ズームは Cmd (Mac) / Ctrl + wheel に限定
+  - ドラッグでの pan は従来どおり
+
+### Fixed
+
+- **Color swatch の GitHub Issue/PR 誤検出を修正** (#55)
+  - `Issue #123` / `PR #456` / `fix #789` など GitHub 参照キーワード直後の `#xxx` を swatch 対象外に
+  - 3/4 桁 hex は a-f を最低 1 文字含むものに限定（純数字 `#123` を除外）
+  - Markdown リンクのアンカー内テキストを swatch 対象外に
+
+### Security
+
+- プレビューの DOMPurify サニタイズ設定で `<style>` タグと `style` 属性を明示的に禁止 (`FORBID_TAGS` / `FORBID_ATTR`)。インライン CSS による挙動改変やフィンガープリンティングを抑止。
+
 ## [0.7.5] - 2026-04-04
 
 ### Security

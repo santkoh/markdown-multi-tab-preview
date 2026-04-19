@@ -11,6 +11,9 @@ declare function acquireVsCodeApi(): {
 
 const vscode = acquireVsCodeApi();
 
+// Apply default theme class before first 'update' message arrives
+document.body.classList.add('theme-soft');
+
 function getTheme(): 'dark' | 'default' {
   return document.body.classList.contains('vscode-dark') ||
     document.body.classList.contains('vscode-high-contrast')
@@ -84,7 +87,7 @@ function applyPanZoom(container: HTMLElement): void {
   // Toggle button (always visible on hover)
   const btnToggle = document.createElement('button');
   btnToggle.className = 'mermaid-btn';
-  btnToggle.title = 'Toggle Pan/Zoom Mode';
+  btnToggle.title = 'Toggle Pan/Zoom Mode (Cmd/Ctrl+Wheel to zoom)';
   btnToggle.appendChild(createSvgIcon(ICON_MOVE));
 
   const btnZoomIn = document.createElement('button');
@@ -108,17 +111,27 @@ function applyPanZoom(container: HTMLElement): void {
   toolbar.appendChild(btnReset);
   container.appendChild(toolbar);
 
+  // Figma-like wheel handler: modifier key → zoom, plain wheel → page scroll
+  const onWheel = (e: WheelEvent): void => {
+    if (!isActive) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      pz.zoomWithWheel(e);
+    }
+    // No modifier → do not preventDefault, let browser handle page scroll
+  };
+
   function enterZoomMode(): void {
     isActive = true;
     pz.setOptions({ disablePan: false });
-    container.addEventListener('wheel', pz.zoomWithWheel, { passive: false });
+    container.addEventListener('wheel', onWheel, { passive: false });
     container.classList.add('mermaid-zoom-active');
     btnToggle.classList.add('mermaid-btn-active');
   }
 
   function exitZoomMode(): void {
     pz.setOptions({ disablePan: true });
-    container.removeEventListener('wheel', pz.zoomWithWheel);
+    container.removeEventListener('wheel', onWheel);
     container.classList.remove('mermaid-zoom-active');
     btnToggle.classList.remove('mermaid-btn-active');
     isActive = false;
@@ -146,7 +159,7 @@ function applyPanZoom(container: HTMLElement): void {
 
   // Cleanup
   panzoomCleanups.push(() => {
-    container.removeEventListener('wheel', pz.zoomWithWheel);
+    container.removeEventListener('wheel', onWheel);
     document.removeEventListener('mousedown', onDocumentMouseDown);
     pz.destroy();
   });
@@ -254,7 +267,20 @@ function applyCopyButtons(): void {
 }
 
 // Color swatch detection regex
-const COLOR_RE = /(?<![&#\w])#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})(?!\w)|rgba?\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}(?:\s*,\s*[\d.]+)?\s*\)|hsla?\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%(?:\s*,\s*[\d.]+)?\s*\)/g;
+// - 3/4-digit hex requires at least one a-f letter (excludes pure-digit refs like #123, #4567, #333)
+// - GitHub reference keywords (Issue/PR/fix/closes etc.) followed by #xxx are excluded
+// - 6/8-digit hex retains the original behaviour (no a-f requirement)
+const _GITHUB_REF_WORDS =
+  '(?:Issue|Issues|PR|PRs|Pull|pull|issue|issues|pr|prs|fix|fixes|fixed|close|closes|closed|resolve|resolves|resolved|merged|ref|see|related)';
+const COLOR_RE = new RegExp(
+  `(?<!${_GITHUB_REF_WORDS}\\s+)(?<![&#\\w])` +
+  `#(?:(?=[0-9a-fA-F]{3}(?!\\w))(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{3}` +
+  `|(?=[0-9a-fA-F]{4}(?!\\w))(?=[0-9a-fA-F]*[a-fA-F])[0-9a-fA-F]{4}` +
+  `|[0-9a-fA-F]{6}(?!\\w)|[0-9a-fA-F]{8}(?!\\w))` +
+  `|rgba?\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}\\s*,\\s*\\d{1,3}(?:\\s*,\\s*[\\d.]+)?\\s*\\)` +
+  `|hsla?\\(\\s*\\d{1,3}\\s*,\\s*\\d{1,3}%\\s*,\\s*\\d{1,3}%(?:\\s*,\\s*[\\d.]+)?\\s*\\)`,
+  'g'
+);
 
 function createSwatchSpan(color: string): HTMLSpanElement {
   const span = document.createElement('span');
@@ -322,6 +348,7 @@ function applyColorSwatches(): void {
     acceptNode(node) {
       if (node.parentElement?.closest('pre code')) return NodeFilter.FILTER_REJECT;
       if (node.parentElement?.closest('.mermaid-diagram')) return NodeFilter.FILTER_REJECT;
+      if (node.parentElement?.closest('a')) return NodeFilter.FILTER_REJECT;
       return NodeFilter.FILTER_ACCEPT;
     }
   });
@@ -612,10 +639,15 @@ window.addEventListener('message', async (event) => {
   switch (message.type) {
     case 'update': {
       const currentVersion = ++renderVersion;
+      // Apply theme preset (default 'soft' when themePreset is undefined)
+      const preset = message.themePreset === 'classic' ? 'classic' : 'soft';
+      document.body.classList.remove('theme-soft', 'theme-classic');
+      document.body.classList.add(`theme-${preset}`);
       destroyAllPanzoom();
       if (content) {
         content.innerHTML = DOMPurify.sanitize(message.html, {
-          FORBID_TAGS: ['form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+          FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
+          FORBID_ATTR: ['style'],
         });
       }
       // Re-initialize mermaid with current theme

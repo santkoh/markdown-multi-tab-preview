@@ -4,6 +4,36 @@ import { escapeHtml } from './utils';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
+const ALERT_LABELS = {
+  NOTE: 'Note',
+  TIP: 'Tip',
+  IMPORTANT: 'Important',
+  WARNING: 'Warning',
+  CAUTION: 'Caution',
+} as const;
+type AlertType = keyof typeof ALERT_LABELS;
+const ALERT_MARKER_RE = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\][^\S\r\n]*(?:\r?\n|$)/;
+
+function consumeGfmAlertMarker(token: Tokens.Blockquote): AlertType | null {
+  const firstBlock = token.tokens[0];
+  if (!firstBlock || firstBlock.type !== 'paragraph') return null;
+  const para = firstBlock as Tokens.Paragraph;
+  const firstInline = para.tokens[0];
+  if (!firstInline || firstInline.type !== 'text' || typeof (firstInline as Tokens.Text).text !== 'string') return null;
+  const textToken = firstInline as Tokens.Text;
+  const match = textToken.text.match(ALERT_MARKER_RE);
+  if (!match) return null;
+  // Strip the `[!TYPE]` marker from the first text token so it isn't re-rendered inline.
+  textToken.text = textToken.text.slice(match[0].length);
+  if (textToken.text === '') {
+    para.tokens.shift();
+    if (para.tokens.length === 0) {
+      token.tokens.shift();
+    }
+  }
+  return match[1] as AlertType;
+}
+
 export interface TocHeading {
   text: string;   // plain text (unescaped) — webview uses textContent for XSS safety
   depth: number;  // 1-6
@@ -136,7 +166,13 @@ export function renderMarkdown(
 
       blockquote(token: Tokens.Blockquote): string {
         const line = tokenLineMap.get(token) ?? '';
+        const alertType = consumeGfmAlertMarker(token);
         const body = this.parser.parse(token.tokens);
+        if (alertType) {
+          const cls = `alert alert-${alertType.toLowerCase()}`;
+          const label = ALERT_LABELS[alertType];
+          return `<blockquote data-line="${line}" class="${cls}"><p class="alert-title">${label}</p>\n${body}</blockquote>\n`;
+        }
         return `<blockquote data-line="${line}">${body}</blockquote>\n`;
       },
 

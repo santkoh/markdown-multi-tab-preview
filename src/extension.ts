@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import { PreviewManager } from './previewManager';
+import { getGitApi } from './gitApi';
+import { DiffPreviewPanel } from './diffPreviewPanel';
 
 let previewManager: PreviewManager;
 
@@ -46,6 +48,34 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('mdMultiTabPreview.showEditor', () => {
       previewManager.showEditorForActivePreview();
+    })
+  );
+
+  // Show Rich Diff Preview
+  context.subscriptions.push(
+    vscode.commands.registerCommand('mdMultiTabPreview.showDiffPreview', async () => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor || !isMarkdownFile(editor.document)) {
+        vscode.window.showWarningMessage('Open a Markdown file to show the diff preview.');
+        return;
+      }
+      const gitApi = await getGitApi();
+      if (!gitApi) {
+        vscode.window.showErrorMessage('Git extension is not available.');
+        return;
+      }
+      const repo = gitApi.getRepository(editor.document.uri);
+      if (!repo) {
+        vscode.window.showErrorMessage('No Git repository found for this file.');
+        return;
+      }
+      const diffPanel = new DiffPreviewPanel(
+        editor.document,
+        context.extensionUri,
+        vscode.ViewColumn.Beside,
+        repo,
+      );
+      context.subscriptions.push({ dispose: () => diffPanel.dispose() });
     })
   );
 

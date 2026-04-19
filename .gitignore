@@ -1,7 +1,7 @@
 node_modules/
 dist/
-media/preview.js
-media/preview.js.map
+media/*.js
+media/*.js.map
 *.vsix
 .DS_Store
 .dev-notes/
