@@ -635,23 +635,52 @@ body.theme-soft {
 
 /* Soft theme blockquote: unify the left accent with the outer card (no floating bar) */
 /* Left corners are flat so the accent bar sits flush without a rounded cutoff. */
+/* The --alert-fg / --alert-bg tokens default to Note (blue) and are overridden by
+   each alert variant. Regular blockquotes inherit the Note look. */
 body.theme-soft blockquote {
+  --alert-fg: #0969da;
+  --alert-bg: rgba(88, 166, 255, 0.18);
   border: 1px solid var(--vscode-panel-border);
   border-left-width: 4px;
-  border-left-color: var(--vscode-textBlockQuote-border);
+  border-left-color: var(--alert-fg);
   border-radius: 0 8px 8px 0;
   padding: 12px 18px;
   margin: 12px 0;
+}
+
+body.vscode-dark.theme-soft blockquote {
+  --alert-fg: #58a6ff;
+  --alert-bg: rgba(88, 166, 255, 0.22);
+}
+
+body.vscode-high-contrast.theme-soft blockquote {
+  --alert-fg: #4da3ff;
+  --alert-bg: transparent;
 }
 
 body.theme-soft blockquote::before {
   content: none;
 }
 
+/* Apply the tint background to every soft-theme blockquote.
+   Theme-prefixed to outrank `body.vscode-* blockquote { background: … }`. */
+body.vscode-light.theme-soft blockquote,
+body.vscode-dark.theme-soft blockquote,
+body.vscode-high-contrast.theme-soft blockquote {
+  background: var(--alert-bg);
+}
+
 body.theme-soft blockquote blockquote {
   margin: 10px 0;
   padding: 8px 14px;
   border-width: 1px 1px 1px 3px;
+}
+
+/* Nested blockquote keeps a transparent background so the hierarchy stays legible. */
+body.vscode-light.theme-soft blockquote blockquote,
+body.vscode-dark.theme-soft blockquote blockquote,
+body.vscode-high-contrast.theme-soft blockquote blockquote {
+  background: transparent;
 }
 
 body.theme-soft pre {
