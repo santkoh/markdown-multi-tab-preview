@@ -27,16 +27,30 @@ const webviewConfig = {
   minify: !isWatch,
 };
 
+/** @type {import('esbuild').BuildOptions} */
+const diffWebviewConfig = {
+  entryPoints: ['src/webview/diff-preview-entry.ts'],
+  bundle: true,
+  outfile: 'media/diff-preview.js',
+  format: 'iife',
+  platform: 'browser',
+  target: 'es2022',
+  sourcemap: true,
+  minify: !isWatch,
+};
+
 async function build() {
   if (isWatch) {
     const extCtx = await esbuild.context(extensionConfig);
     const webCtx = await esbuild.context(webviewConfig);
-    await Promise.all([extCtx.watch(), webCtx.watch()]);
+    const diffWebCtx = await esbuild.context(diffWebviewConfig);
+    await Promise.all([extCtx.watch(), webCtx.watch(), diffWebCtx.watch()]);
     console.log('[watch] Build started...');
   } else {
     await Promise.all([
       esbuild.build(extensionConfig),
       esbuild.build(webviewConfig),
+      esbuild.build(diffWebviewConfig),
     ]);
     console.log('Build complete.');
   }
