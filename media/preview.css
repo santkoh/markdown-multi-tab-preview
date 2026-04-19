@@ -634,11 +634,12 @@ body.theme-soft {
 }
 
 /* Soft theme blockquote: unify the left accent with the outer card (no floating bar) */
+/* Left corners are flat so the accent bar sits flush without a rounded cutoff. */
 body.theme-soft blockquote {
   border: 1px solid var(--vscode-panel-border);
   border-left-width: 4px;
   border-left-color: var(--vscode-textBlockQuote-border);
-  border-radius: 8px;
+  border-radius: 0 8px 8px 0;
   padding: 12px 18px;
   margin: 12px 0;
 }
@@ -705,8 +706,25 @@ body.theme-soft tr:last-child td {
   border-bottom: none;
 }
 
+/* Header differentiated via stronger tint, uppercase small-caps typography,
+   and a 2px bottom rule that visually separates it from the zebra body. */
 body.theme-soft th {
-  background: var(--vscode-editorGroupHeader-tabsBackground);
+  background: rgba(127, 127, 127, 0.14);
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.78em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 10px 14px;
+  border-bottom: 2px solid var(--vscode-panel-border);
+}
+
+body.vscode-dark.theme-soft th {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+body.vscode-light.theme-soft th {
+  background: rgba(0, 0, 0, 0.055);
 }
 
 /* Zebra-striped rows (soft theme) */
@@ -766,19 +784,19 @@ body.theme-soft h2 {
 
 /* ===== GFM Alerts (NOTE / TIP / IMPORTANT / WARNING / CAUTION) ===== */
 
-/* Color tokens — light */
-blockquote.alert-note      { --alert-fg: #0969da; --alert-bg: rgba(9, 105, 218, 0.08); }
-blockquote.alert-tip       { --alert-fg: #1a7f37; --alert-bg: rgba(26, 127, 55, 0.08); }
-blockquote.alert-important { --alert-fg: #8250df; --alert-bg: rgba(130, 80, 223, 0.08); }
-blockquote.alert-warning   { --alert-fg: #9a6700; --alert-bg: rgba(154, 103, 0, 0.08); }
-blockquote.alert-caution   { --alert-fg: #cf222e; --alert-bg: rgba(207, 34, 46, 0.08); }
+/* Color tokens — light (subtle tint: うっすら colored) */
+blockquote.alert-note      { --alert-fg: #0969da; --alert-bg: rgba(9, 105, 218, 0.10); }
+blockquote.alert-tip       { --alert-fg: #1a7f37; --alert-bg: rgba(126, 188, 73, 0.14); }
+blockquote.alert-important { --alert-fg: #8250df; --alert-bg: rgba(130, 80, 223, 0.10); }
+blockquote.alert-warning   { --alert-fg: #9a6700; --alert-bg: rgba(212, 167, 44, 0.14); }
+blockquote.alert-caution   { --alert-fg: #cf222e; --alert-bg: rgba(207, 34, 46, 0.10); }
 
 /* Color tokens — dark */
-body.vscode-dark blockquote.alert-note      { --alert-fg: #58a6ff; --alert-bg: rgba(56, 139, 253, 0.14); }
-body.vscode-dark blockquote.alert-tip       { --alert-fg: #3fb950; --alert-bg: rgba(46, 160, 67, 0.14); }
-body.vscode-dark blockquote.alert-important { --alert-fg: #a371f7; --alert-bg: rgba(137, 87, 229, 0.16); }
-body.vscode-dark blockquote.alert-warning   { --alert-fg: #d29922; --alert-bg: rgba(187, 128, 9, 0.16); }
-body.vscode-dark blockquote.alert-caution   { --alert-fg: #f85149; --alert-bg: rgba(248, 81, 73, 0.16); }
+body.vscode-dark blockquote.alert-note      { --alert-fg: #58a6ff; --alert-bg: rgba(88, 166, 255, 0.14); }
+body.vscode-dark blockquote.alert-tip       { --alert-fg: #3fb950; --alert-bg: rgba(147, 197, 93, 0.18); }
+body.vscode-dark blockquote.alert-important { --alert-fg: #a371f7; --alert-bg: rgba(163, 113, 247, 0.16); }
+body.vscode-dark blockquote.alert-warning   { --alert-fg: #d29922; --alert-bg: rgba(224, 188, 80, 0.18); }
+body.vscode-dark blockquote.alert-caution   { --alert-fg: #f85149; --alert-bg: rgba(248, 113, 113, 0.14); }
 
 /* High-contrast */
 body.vscode-high-contrast blockquote.alert-note      { --alert-fg: #4da3ff; --alert-bg: transparent; }
@@ -787,8 +805,10 @@ body.vscode-high-contrast blockquote.alert-important { --alert-fg: #b387f7; --al
 body.vscode-high-contrast blockquote.alert-warning   { --alert-fg: #e5ad2c; --alert-bg: transparent; }
 body.vscode-high-contrast blockquote.alert-caution   { --alert-fg: #ff6b61; --alert-bg: transparent; }
 
-/* Apply the color tokens to the alert container */
-blockquote.alert {
+/* Apply the color tokens — theme-prefixed so they out-specify body.vscode-*/blockquote */
+body.vscode-light blockquote.alert,
+body.vscode-dark blockquote.alert,
+body.vscode-high-contrast blockquote.alert {
   background: var(--alert-bg);
 }
 
