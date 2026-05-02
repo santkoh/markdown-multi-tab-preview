@@ -636,8 +636,30 @@ content?.addEventListener('click', (e: MouseEvent) => {
     const target = content?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
     if (!target) return;
     const rect = target.getBoundingClientRect();
+    if (Math.abs(rect.top - 16) < 4) return;
+
+    // Suppress editor→preview scroll sync mid-animation, otherwise an `instant`
+    // scroll from the round-trip cancels the smooth animation.
+    isScrollingFromToc = true;
+    clearTimeout(scrollFromTocTimer);
+
     const scrollTarget = window.scrollY + rect.top - 16;
     window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+
+    const onScrollEnd = (): void => {
+      window.removeEventListener('scrollend', onScrollEnd);
+      clearTimeout(scrollFromTocTimer);
+      const line = getNearestLineAtTop();
+      if (line !== null) {
+        vscode.postMessage({ type: 'scrollEditor', line });
+      }
+      scrollFromTocTimer = setTimeout(() => { isScrollingFromToc = false; }, 100);
+    };
+    window.addEventListener('scrollend', onScrollEnd, { once: true });
+    scrollFromTocTimer = setTimeout(() => {
+      window.removeEventListener('scrollend', onScrollEnd);
+      isScrollingFromToc = false;
+    }, 1500);
     return;
   }
   e.preventDefault();
