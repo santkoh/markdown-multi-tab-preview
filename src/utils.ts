@@ -12,3 +12,11 @@ export function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 }
+
+export function slugify(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s\-]/gu, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}

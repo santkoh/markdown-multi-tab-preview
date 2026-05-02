@@ -626,7 +626,20 @@ content?.addEventListener('click', (e: MouseEvent) => {
   const anchor = (e.target as HTMLElement).closest('a');
   if (!anchor) return;
   const href = anchor.getAttribute('href');
-  if (!href || href.startsWith('#')) return;
+  if (!href) return;
+  if (href.startsWith('#')) {
+    // In-document fragment navigation — webview's native hash routing is unreliable,
+    // so resolve the heading id manually and scroll there.
+    e.preventDefault();
+    const id = decodeURIComponent(href.slice(1));
+    if (!id) return;
+    const target = content?.querySelector<HTMLElement>(`[id="${CSS.escape(id)}"]`);
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    const scrollTarget = window.scrollY + rect.top - 16;
+    window.scrollTo({ top: Math.max(0, scrollTarget), behavior: 'smooth' });
+    return;
+  }
   e.preventDefault();
   vscode.postMessage({ type: 'linkClick', href });
 });

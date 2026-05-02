@@ -1,6 +1,6 @@
 import { Marked, Tokens } from 'marked';
 import * as vscode from 'vscode';
-import { escapeHtml } from './utils';
+import { escapeHtml, slugify } from './utils';
 
 const FRONTMATTER_RE = /^---\r?\n([\s\S]*?)\r?\n---(?:\r?\n|$)/;
 
@@ -109,7 +109,9 @@ export function renderMarkdown(
         const line = tokenLineMap.get(token) ?? '';
         const text = this.parser.parseInline(token.tokens);
         const prefix = '#'.repeat(token.depth);
-        return `<h${token.depth} data-line="${line}"><span class="heading-prefix">${prefix}</span> ${text}</h${token.depth}>\n`;
+        const id = slugify(extractPlainText(token.tokens));
+        const idAttr = id ? ` id="${escapeHtml(id)}"` : '';
+        return `<h${token.depth}${idAttr} data-line="${line}"><span class="heading-prefix">${prefix}</span> ${text}</h${token.depth}>\n`;
       },
 
       code(token: Tokens.Code): string {
