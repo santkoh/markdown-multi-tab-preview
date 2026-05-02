@@ -1,14 +1,7 @@
 import * as vscode from 'vscode';
 import { PreviewPanel } from './previewPanel';
 import { extractHeadings } from './markdownRenderer';
-
-function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}\s\-]/gu, '')
-    .trim()
-    .replace(/\s+/g, '-');
-}
+import { slugify } from './utils';
 
 function findHeadingLine(markdown: string, fragment: string): number | null {
   const target = slugify(fragment);
