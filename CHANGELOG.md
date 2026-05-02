@@ -8,6 +8,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.1] - 2026-05-02
+
+### Fixed
+
+- ドキュメント内 fragment リンク (`[xxx](#yyy)`) で対応する見出しに飛べない不具合を修正、smooth scroll でアニメーションするように改善 (#68)
+
+### Security
+
+- 推移的依存に含まれる `uuid <14.0.0` の moderate 脆弱性 (GHSA-w5hq-g745-h8pq) を `pnpm.overrides` で解消 (#66)
+
+### Changed
+
+- 最低サポート VS Code バージョンを 1.118.0 に更新 (#66, #67)
+- ランタイム依存を更新: marked 17.0.5 → 17.0.6 / dompurify 3.4.0 → 3.4.1 / @panzoom/panzoom 4.6.1 → 4.6.2 (#64)
+- 開発依存と CI 依存をまとめて最新化 (#53, #60, #62, #63)
+
 ## [0.8.0] - 2026-04-19
 
 ### Added
@@ -208,6 +224,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.8.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.5...v0.8.0
 [0.7.5]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.4...v0.7.5
 [0.7.4]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.3...v0.7.4
