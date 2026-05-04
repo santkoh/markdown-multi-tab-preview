@@ -26,6 +26,39 @@
 - **画像表示** — 相対パスの画像を正しく解決して Webview 内に表示。リモート画像の読み込みは設定で切り替えできます。
 - **テーマ連動** — VS Code の Light・Dark・High Contrast テーマに完全対応しています。
 
+## VS Code 標準の Markdown プレビューとの違い
+
+VS Code 標準の Markdown プレビューは十分に優秀で、本拡張機能と機能が重なる部分も多くあります。**「Markdown ファイルごとに 1 つのプレビュータブが開く」ことだけが目的**であれば、拡張機能を入れなくても標準の `markdown.showPreview` と `markdown.preview.toggleLock` を `runCommands` でチェーンすれば実現できます（[#65](https://github.com/santkoh/markdown-multi-tab-preview/issues/65) で指摘いただいた通りです）:
+
+```json
+{
+  "key": "ctrl+shift+v",
+  "command": "runCommands",
+  "args": {
+    "commands": ["markdown.showPreview", "markdown.preview.toggleLock"]
+  },
+  "when": "editorLangId == markdown"
+}
+```
+
+本拡張機能は **その上に載せる** UX 改善と、標準プレビューには無い機能のために存在します:
+
+| 機能 | 標準プレビュー | 本拡張機能 |
+| --- | --- | --- |
+| ファイルごとに 1 タブ | ✅ `runCommands` のキーバインドで可能 | ✅ デフォルト動作（設定不要） |
+| `.md` を開いた瞬間に自動でプレビュー表示 | ❌ | ✅ (`autoPreview`) |
+| Mermaid の Pan/Zoom（Figma ライクなホイール挙動） | ❌ | ✅ |
+| プレビューパネル内に Outline サイドバー（depth 設定可） | ❌ | ✅ |
+| Hex / RGB(A) / HSL(A) のインラインカラースウォッチ | ❌ | ✅ |
+| `HEAD` との Rich Diff（左右並列レンダリング比較） | ❌ | ✅ |
+| GFM Alerts（`> [!NOTE]` 等）をテーマ連動の 5 色で装飾 | 一部 | ✅ |
+| YAML フロントマターをラベル付きブロックとして表示 | ❌ | ✅ |
+| コードブロックのホバーでコピーボタン | ❌ | ✅ |
+| Soft / Classic 外観プリセット（角丸・ゼブラテーブル 等） | ❌ | ✅ |
+| 見出しの `#` / `##` プレフィックスを控えめなグレーで表示 | ❌ | ✅ |
+
+右側の項目があまり刺さらなければ、標準プレビュー + 上記キーバインドで十分です。逆にこれらの UX や機能が欲しい場合は、本拡張機能が CSP と DOMPurify のサニタイズを効かせた状態でまとめて提供します。
+
 ## 使い方
 
 ### 自動プレビュー
