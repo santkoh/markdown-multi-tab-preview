@@ -26,6 +26,39 @@ Preview multiple Markdown files simultaneously with independent preview panels. 
 - **Image Support** — Relative image paths are resolved correctly within the webview. Remote images can be toggled via settings.
 - **Theme Integration** — Fully follows VS Code's Light, Dark, and High Contrast themes.
 
+## How this differs from VS Code's built-in Markdown preview
+
+VS Code's built-in preview is excellent, and many of its capabilities overlap with this extension. If your only need is "one preview tab per Markdown file", you can already get that without any extension by chaining the built-in commands `markdown.showPreview` and `markdown.preview.toggleLock` via `runCommands` (see [#65](https://github.com/santkoh/markdown-multi-tab-preview/issues/65)):
+
+```json
+{
+  "key": "ctrl+shift+v",
+  "command": "runCommands",
+  "args": {
+    "commands": ["markdown.showPreview", "markdown.preview.toggleLock"]
+  },
+  "when": "editorLangId == markdown"
+}
+```
+
+This extension exists for everything **on top of** that — opinionated UX touches and features that are not in the built-in preview:
+
+| Capability | Built-in preview | This extension |
+| --- | --- | --- |
+| One preview tab per file | ✅ via `runCommands` keybinding | ✅ default, zero setup |
+| Auto-open preview when a `.md` is opened | ❌ | ✅ (`autoPreview`) |
+| Mermaid pan/zoom (Figma-like wheel = scroll, Cmd/Ctrl + wheel = zoom) | ❌ | ✅ |
+| Outline sidebar **inside** the preview pane | ❌ | ✅ (depth configurable) |
+| Inline color swatches for Hex / RGB(A) / HSL(A) | ❌ | ✅ |
+| Rich Diff vs `HEAD` (rendered side-by-side) | ❌ | ✅ |
+| GFM Alerts (`> [!NOTE]` etc.) with 5 themed color schemes | partial | ✅ |
+| YAML frontmatter as a labeled block | ❌ | ✅ |
+| Copy-to-clipboard button on code blocks (hover) | ❌ | ✅ |
+| Soft / Classic theme presets (rounded corners, zebra tables, etc.) | ❌ | ✅ |
+| Heading prefix (`#` / `##`) styled in subtle gray | ❌ | ✅ |
+
+If most of the items in the right column don't matter to you, the built-in preview plus the keybinding above will likely serve you better. If they do, this extension bundles them together with strict CSP + DOMPurify sanitization.
+
 ## Usage
 
 ### Auto Preview
