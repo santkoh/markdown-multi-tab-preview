@@ -8,6 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.8.2] - 2026-05-04
+
+### Changed
+
+- README に「VS Code 標準プレビューとの違い」セクションを追加。Issue #65 で指摘いただいた `runCommands` ベースの純正マルチタブ動作を紹介した上で、本拡張がオン・トップで提供する機能（Auto-Preview / Mermaid Pan/Zoom / Outline / Color Swatch / Rich Diff / GFM Alerts / Frontmatter / Copy ボタン / Soft・Classic preset / 見出しプレフィックス styling）を比較表で整理 (#71)
+- CI 依存を更新: pnpm/action-setup 6.0.4 → 6.0.5 (#70)
+
 ## [0.8.1] - 2026-05-02
 
 ### Fixed
@@ -224,6 +231,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.8.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.5...v0.8.0
 [0.7.5]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.4...v0.7.5
