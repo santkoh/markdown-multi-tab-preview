@@ -666,6 +666,27 @@ content?.addEventListener('click', (e: MouseEvent) => {
   vscode.postMessage({ type: 'linkClick', href });
 });
 
+/**
+ * Attach git gutter classes to block elements keyed by their data-line.
+ * `entries` is the extension's newLineKind: [0-based start line, 'added'|'modified'].
+ * Granularity is per-block — a block is decorated when its start line was
+ * added/modified — since the preview has no per-source-line DOM structure.
+ */
+function applyGitGutter(entries?: [number, string][]): void {
+  if (!content) return;
+  const kind = new Map<number, string>(entries ?? []);
+  const blocks = content.querySelectorAll<HTMLElement>('[data-line]');
+  blocks.forEach((el) => {
+    el.classList.remove('git-added', 'git-modified');
+    if (kind.size === 0) return;
+    const line = parseInt(el.getAttribute('data-line') ?? '', 10);
+    if (Number.isNaN(line)) return;
+    const k = kind.get(line);
+    if (k === 'added') el.classList.add('git-added');
+    else if (k === 'modified') el.classList.add('git-modified');
+  });
+}
+
 let renderVersion = 0;
 
 window.addEventListener('message', async (event) => {
@@ -701,6 +722,7 @@ window.addEventListener('message', async (event) => {
       if (message.colorDecorator !== false) {
         applyColorSwatches();
       }
+      applyGitGutter(message.gitDecorations === false ? [] : message.newLineKind);
       applyScrollIfReady();
       // TOC handling
       if (message.tocEnabled !== false) {

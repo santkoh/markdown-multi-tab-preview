@@ -2,6 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { renderMarkdown } from './markdownRenderer';
 import { getNonce } from './utils';
+import { getGitApi, Repository } from './gitApi';
+import { parseUnifiedDiff } from './diffParser';
 
 export type LinkClickHandler = (sourceUri: vscode.Uri, href: string) => void;
 
@@ -21,6 +23,8 @@ export class PreviewPanel {
   private isDirty = false;
   private isWebviewReady = false;
   private pendingScrollLine = 0;
+  // undefined = not yet resolved; null = no git repo for this document.
+  private gitRepo: Repository | null | undefined;
 
   public get documentUri(): vscode.Uri {
     return this.document.uri;
@@ -84,7 +88,7 @@ export class PreviewPanel {
 
     this.panel.onDidChangeViewState(() => {
       if (this.panel.visible && this.isDirty) {
-        this.update();
+        void this.update();
       }
     }, null, this.disposables);
 
@@ -103,7 +107,8 @@ export class PreviewPanel {
         e.affectsConfiguration('mdMultiTabPreview.colorDecorator') ||
         e.affectsConfiguration('mdMultiTabPreview.toc.enabled') ||
         e.affectsConfiguration('mdMultiTabPreview.toc.maxDepth') ||
-        e.affectsConfiguration('mdMultiTabPreview.theme.preset')
+        e.affectsConfiguration('mdMultiTabPreview.theme.preset') ||
+        e.affectsConfiguration('mdMultiTabPreview.gitDecorations')
       ) {
         this.scheduleUpdate();
       }
@@ -127,7 +132,7 @@ export class PreviewPanel {
     this.panel.webview.onDidReceiveMessage((message) => {
       if (message.type === 'ready') {
         this.isWebviewReady = true;
-        this.update();
+        void this.update();
         if (this.pendingScrollLine > 0) {
           this.postScroll(this.pendingScrollLine);
           this.pendingScrollLine = 0;
@@ -211,11 +216,11 @@ export class PreviewPanel {
         this.isDirty = true;
         return;
       }
-      this.update();
+      void this.update();
     }, 300);
   }
 
-  private update(): void {
+  private async update(): Promise<void> {
     if (this.isDisposed) return;
     this.isDirty = false;
     try {
@@ -225,6 +230,10 @@ export class PreviewPanel {
         this.document.uri
       );
       const config = vscode.workspace.getConfiguration('mdMultiTabPreview');
+      const gitDecorations = config.get<boolean>('gitDecorations', true);
+      const newLineKind = gitDecorations ? await this.computeGitDecorations() : [];
+      // The git lookup is async — bail out if the panel was disposed meanwhile.
+      if (this.isDisposed) return;
       this.panel.webview.postMessage({
         type: 'update',
         html,
@@ -234,10 +243,45 @@ export class PreviewPanel {
         tocMaxDepth: config.get<number>('toc.maxDepth', 3),
         tocVisible: this.workspaceState.get<boolean>('tocVisible', false),
         themePreset: config.get<string>('theme.preset', 'soft'),
+        gitDecorations,
+        newLineKind,
       });
     } catch (err) {
       console.error('Failed to update preview:', err);
     }
+  }
+
+  /**
+   * Compute git decorations for the working tree vs HEAD as 0-based
+   * [line, 'added' | 'modified'] entries. Returns an empty array when git is
+   * unavailable, the file is untracked, or it sits outside the repo. Never throws.
+   */
+  private async computeGitDecorations(): Promise<[number, string][]> {
+    try {
+      const repo = await this.resolveRepo();
+      if (!repo) return [];
+      const relPath = path
+        .relative(repo.rootUri.fsPath, this.document.uri.fsPath)
+        .replace(/\\/g, '/');
+      if (relPath === '' || relPath.startsWith('..')) return []; // outside repo root
+      const diffStr = await repo.diffWithHEAD(relPath);
+      const { newLineKind } = parseUnifiedDiff(diffStr);
+      return Array.from(newLineKind.entries());
+    } catch {
+      return [];
+    }
+  }
+
+  /** Resolve (and cache) the git repository owning this document, or null. */
+  private async resolveRepo(): Promise<Repository | null> {
+    if (this.gitRepo !== undefined) return this.gitRepo;
+    try {
+      const api = await getGitApi();
+      this.gitRepo = api?.getRepository(this.document.uri) ?? null;
+    } catch {
+      this.gitRepo = null;
+    }
+    return this.gitRepo;
   }
 
   private setHtml(): void {

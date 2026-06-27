@@ -7,7 +7,7 @@ body {
   /* padding-bottom mirrors editor.scrollBeyondLastLine so any heading can reach the viewport top */
   padding: 16px 24px 80vh;
   margin: 0;
-  max-width: 960px;
+  max-width: 1200px;
 }
 
 /* Frontmatter */
@@ -145,6 +145,12 @@ hr {
 }
 
 /* Tables */
+/* Wrapper added by markdownRenderer so wide tables scroll horizontally
+   instead of forcing the cells to wrap into an unreadable tall layout. */
+.table-scroll {
+  overflow-x: auto;
+  max-width: 100%;
+}
 table {
   border-collapse: collapse;
   width: 100%;
@@ -458,7 +464,7 @@ body.toc-visible {
 }
 
 body.toc-visible #content {
-  max-width: 960px;
+  max-width: 1200px;
 }
 
 /* Reserve space for toggle button when headings exist but sidebar closed */
@@ -773,7 +779,13 @@ body.theme-soft tbody tr {
   transition: background-color 0.12s ease;
 }
 
-body.theme-soft tbody tr:hover td {
+/* Hover must win over the zebra rules above. The even-row backgrounds are
+   theme-qualified (body.vscode-dark.theme-soft … = specificity 0,3,4), so the
+   bare hover rule (0,2,4) lost on even rows — the light stripe never reacted.
+   Qualifying the hover selectors the same way restores hover on every row. */
+body.theme-soft tbody tr:hover td,
+body.vscode-dark.theme-soft tbody tr:hover td,
+body.vscode-light.theme-soft tbody tr:hover td {
   background: var(--vscode-list-hoverBackground, rgba(127, 127, 127, 0.1));
 }
 
@@ -863,4 +875,34 @@ body.theme-soft blockquote.alert {
 /* Trim trailing margin so the bottom padding of the alert card is consistent */
 .alert > :last-child {
   margin-bottom: 0;
+}
+
+/* ===== Git change decorations (gutter bars) ===== */
+/* Webview-only: classes are attached in preview-entry after sanitisation,
+   keyed by each block's data-line. Granularity is per-block (the bar marks a
+   block whose start line was added/modified), since the preview has no
+   per-source-line structure. Colors follow the editor gutter tokens. */
+[data-line].git-added,
+[data-line].git-modified {
+  position: relative;
+}
+
+[data-line].git-added::after,
+[data-line].git-modified::after {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+[data-line].git-added::after {
+  background: var(--vscode-editorGutter-addedBackground, var(--vscode-gitDecoration-addedResourceForeground, #2ea043));
+}
+
+[data-line].git-modified::after {
+  background: var(--vscode-editorGutter-modifiedBackground, var(--vscode-gitDecoration-modifiedResourceForeground, #2f81f7));
 }

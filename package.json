@@ -103,6 +103,11 @@
           "default": true,
           "description": "プレビューでカラーコードの横に色見本を表示する"
         },
+        "mdMultiTabPreview.gitDecorations": {
+          "type": "boolean",
+          "default": true,
+          "description": "プレビューの各ブロック左端に Git 変更マーカー（追加: 緑 / 変更: 青の帯）を表示する"
+        },
         "mdMultiTabPreview.toc.enabled": {
           "type": "boolean",
           "default": true,
