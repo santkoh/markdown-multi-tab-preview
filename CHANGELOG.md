@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Added
+
+- コードブロックに CJK 等幅フォント **Sarasa Mono**（OFL-1.1）を同梱し、既定で適用。全角・半角を混ぜた ASCII アートや罫線表が、エディタだけでなく Preview でも桁揃えされるようになった（従来はエディタのモノスペースフォントに CJK グリフが無く、システムフォントへフォールバックして送り幅が 2:1 にならず桁ズレしていた）
+- 設定 `mdMultiTabPreview.codeFontFamily` を追加。コードブロックのフォントを任意の `font-family` で上書きできる（空のときは同梱フォントを使用）。通常プレビュー・Rich Diff の両方に適用
+
 ## [0.8.2] - 2026-05-04
 
 ### Changed

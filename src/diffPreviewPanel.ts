@@ -119,6 +119,9 @@ export class DiffPreviewPanel {
     const { html: currentHtml } = renderMarkdown(workingContent, webview, this.document.uri);
 
     const hasChanges = diffResult.oldLines.size > 0 || diffResult.newLines.size > 0;
+    const codeFontFamily = vscode.workspace
+      .getConfiguration('mdMultiTabPreview')
+      .get<string>('codeFontFamily', '');
 
     void this.panel.webview.postMessage({
       type: 'update',
@@ -127,6 +130,7 @@ export class DiffPreviewPanel {
       oldLines: Array.from(diffResult.oldLines.entries()),
       newLines: Array.from(diffResult.newLines.entries()),
       hasChanges,
+      codeFontFamily,
     });
   }
 

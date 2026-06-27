@@ -687,6 +687,23 @@ function applyGitGutter(entries?: [number, string][]): void {
   });
 }
 
+/**
+ * Override the code-block font via the --mdmtp-code-font custom property.
+ * An empty/whitespace value removes the property so the CSS default
+ * (bundled "Sarasa Mono Bundled" first) applies. A user value is placed
+ * first and still keeps the bundled CJK font as a fallback so that any
+ * glyphs the chosen font lacks stay width-consistent.
+ */
+function applyCodeFont(value: unknown): void {
+  const font = typeof value === 'string' ? value.trim() : '';
+  const root = document.documentElement;
+  if (font) {
+    root.style.setProperty('--mdmtp-code-font', `${font}, "Sarasa Mono Bundled", monospace`);
+  } else {
+    root.style.removeProperty('--mdmtp-code-font');
+  }
+}
+
 let renderVersion = 0;
 
 window.addEventListener('message', async (event) => {
@@ -699,6 +716,8 @@ window.addEventListener('message', async (event) => {
       const preset = message.themePreset === 'classic' ? 'classic' : 'soft';
       document.body.classList.remove('theme-soft', 'theme-classic');
       document.body.classList.add(`theme-${preset}`);
+      // Apply code font override; empty value falls back to the bundled CJK monospace in CSS.
+      applyCodeFont(message.codeFontFamily);
       destroyAllPanzoom();
       if (content) {
         content.innerHTML = DOMPurify.sanitize(message.html, {

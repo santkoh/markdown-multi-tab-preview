@@ -108,7 +108,8 @@ export class PreviewPanel {
         e.affectsConfiguration('mdMultiTabPreview.toc.enabled') ||
         e.affectsConfiguration('mdMultiTabPreview.toc.maxDepth') ||
         e.affectsConfiguration('mdMultiTabPreview.theme.preset') ||
-        e.affectsConfiguration('mdMultiTabPreview.gitDecorations')
+        e.affectsConfiguration('mdMultiTabPreview.gitDecorations') ||
+        e.affectsConfiguration('mdMultiTabPreview.codeFontFamily')
       ) {
         this.scheduleUpdate();
       }
@@ -243,6 +244,7 @@ export class PreviewPanel {
         tocMaxDepth: config.get<number>('toc.maxDepth', 3),
         tocVisible: this.workspaceState.get<boolean>('tocVisible', false),
         themePreset: config.get<string>('theme.preset', 'soft'),
+        codeFontFamily: config.get<string>('codeFontFamily', ''),
         gitDecorations,
         newLineKind,
       });

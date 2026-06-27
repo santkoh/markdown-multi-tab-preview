@@ -166,18 +166,29 @@ th {
   font-weight: 600;
 }
 
-/* Inline code */
+/* Bundled CJK-capable monospace (Sarasa Mono, OFL-1.1).
+   全角=半角×2 で設計されたフォントを Latin/CJK 双方の供給元にすることで、
+   ASCII アートや罫線表に日本語を混ぜても Preview で桁が揃う。
+   ユーザーが mdMultiTabPreview.codeFontFamily を設定すると、その値が
+   --mdmtp-code-font として注入され同梱フォントより優先される。 */
+@font-face {
+  font-family: "Sarasa Mono Bundled";
+  src: url("fonts/sarasa-mono-bundled.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Inline code & code blocks.
+   各 var() には必ずリテラルのフォールバックを与える。素の var() をネストすると、
+   その変数が webview で未定義のとき IACVT で font-family 宣言全体が無効化され、
+   "Sarasa Mono Bundled" に到達せず UA 既定 monospace に戻ってしまうため。 */
 code {
   font-family:
-    var(--vscode-editor-fontFamily),
-    "Cascadia Code",
-    "JetBrains Mono",
-    "Fira Code",
-    "Source Code Pro",
-    Menlo,
-    Consolas,
-    "Courier New",
-    monospace;
+    var(--mdmtp-code-font, "Sarasa Mono Bundled"),
+    var(--vscode-editor-font-family, var(--vscode-editor-fontFamily, "Cascadia Code")),
+    "JetBrains Mono", "Fira Code", "Source Code Pro",
+    Menlo, Consolas, "Courier New", monospace;
   font-size: 0.9em;
   background: var(--vscode-textCodeBlock-background);
   padding: 2px 6px;

@@ -129,6 +129,11 @@
             "soft: 角丸 + 柔らかい枠線（推奨）",
             "classic: 従来デザイン"
           ]
+        },
+        "mdMultiTabPreview.codeFontFamily": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "コードブロック／インラインコードのフォントを上書きする CSS `font-family` 値（例: `Sarasa Mono J`、`'HackGen', monospace`）。空の場合は同梱の CJK 等幅フォント **Sarasa Mono**（OFL-1.1）を既定で使用し、全角・半角混在の ASCII アートや罫線表が Preview でも桁揃えされます。上書きする場合は、桁揃えを保ちたいなら CJK の全角が半角の正確に 2 倍幅で設計された等幅フォントを指定してください。"
         }
       }
     }
