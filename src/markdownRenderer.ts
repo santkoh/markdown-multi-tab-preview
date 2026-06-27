@@ -163,7 +163,10 @@ export function renderMarkdown(
           body += '</tr>';
         }
 
-        return `<table data-line="${line}"><thead>${header}</thead><tbody>${body}</tbody></table>\n`;
+        // Wrap the table so it can scroll horizontally when it overflows the
+        // viewport. data-line lives on the wrapper (not the table) so scroll
+        // sync / TOC keep finding a single block element per source line.
+        return `<div class="table-scroll" data-line="${line}"><table><thead>${header}</thead><tbody>${body}</tbody></table></div>\n`;
       },
 
       blockquote(token: Tokens.Blockquote): string {
