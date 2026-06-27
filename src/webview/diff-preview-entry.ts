@@ -87,9 +87,21 @@ window.addEventListener('message', (event: MessageEvent) => {
     oldLines?: [number, string][];
     newLines?: [number, string][];
     hasChanges?: boolean;
+    codeFontFamily?: string;
   };
 
   if (msg.type !== 'update') return;
+
+  // Apply code font override; empty value falls back to the bundled CJK monospace in CSS.
+  const codeFont = typeof msg.codeFontFamily === 'string' ? msg.codeFontFamily.trim() : '';
+  if (codeFont) {
+    document.documentElement.style.setProperty(
+      '--mdmtp-code-font',
+      `${codeFont}, "Sarasa Mono Bundled", monospace`,
+    );
+  } else {
+    document.documentElement.style.removeProperty('--mdmtp-code-font');
+  }
 
   // Sanitize and render HTML for both panes.
   basePane.innerHTML = DOMPurify.sanitize(msg.baseHtml ?? '', DOMPUR_OPTIONS) as string;

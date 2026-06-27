@@ -85,6 +85,13 @@ Click the edit icon in the preview panel's title bar, or use the Command Palette
 | `mdMultiTabPreview.colorDecorator` | `boolean` | `true` | Show color swatches next to color codes in preview |
 | `mdMultiTabPreview.toc.enabled` | `boolean` | `true` | Show Outline (heading navigation) sidebar in preview |
 | `mdMultiTabPreview.toc.maxDepth` | `number` | `3` | Maximum heading depth shown in the Outline (1–6) |
+| `mdMultiTabPreview.codeFontFamily` | `string` | `""` | Override the code font (`font-family`). When empty, the bundled CJK-aware monospace **Sarasa Mono** is used so that ASCII art / box-drawing tables stay column-aligned even when half-width and full-width (CJK) characters are mixed. |
+
+### Code block font & CJK ASCII art alignment
+
+Code blocks render in the bundled **Sarasa Mono** font by default. Because its full-width (CJK) glyphs are exactly twice the width of its half-width glyphs, ASCII-art UI mockups and box-drawing tables that mix Japanese and ASCII stay aligned in the preview — unlike most editor monospace fonts, which lack CJK glyphs and fall back to a system font with a non-2:1 advance width.
+
+To use your own font instead, set `mdMultiTabPreview.codeFontFamily` (e.g. `"Sarasa Mono J"`, `"'HackGen', monospace"`). For ASCII-art alignment, pick a monospace font whose full-width characters are exactly 2× the half-width advance.
 
 ## Requirements
 
@@ -101,3 +108,7 @@ See the [Changelog](CHANGELOG.md) for a full list of changes in each version.
 ## License
 
 [MIT](LICENSE)
+
+### Bundled font
+
+This extension bundles **Sarasa Mono** (更紗等幅ゴシック), © Renzhi Li and contributors, licensed under the [SIL Open Font License 1.1](media/fonts/LICENSE-Sarasa.txt). The font is redistributed unmodified (re-packaged from TTF to WOFF2). Source: <https://github.com/be5invis/Sarasa-Gothic>.

@@ -8,6 +8,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-06-27
+
+### Added
+
+- プレビュー各ブロックの左端に Git 変更マーカー（追加: 緑 / 変更: 青の帯）を表示する gutter を追加。設定 `mdMultiTabPreview.gitDecorations` でトグル可能
+- コードブロックに CJK 等幅フォント **Sarasa Mono**（OFL-1.1）を同梱し、既定で適用。全角・半角を混ぜた ASCII アートや罫線表が、エディタだけでなく Preview でも桁揃えされるようになった（従来はエディタのモノスペースフォントに CJK グリフが無く、システムフォントへフォールバックして送り幅が 2:1 にならず桁ズレしていた）
+- 設定 `mdMultiTabPreview.codeFontFamily` を追加。コードブロックのフォントを任意の `font-family` で上書きできる（空のときは同梱フォントを使用）。通常プレビュー・Rich Diff の両方に適用
+- プレビューの最大コンテンツ幅を拡張し、広い画面で本文をより広く表示できるように改善
+- 横に長いテーブルを横スクロールできるように対応
+
+### Fixed
+
+- テーブルの zebra（交互背景）行でホバー時に背景色が正しく表示されない不具合を修正
+
+### Security
+
+- 依存パッケージの既知脆弱性を解消（`dompurify` を 3.4.11 へ更新、`@vscode/vsce` 配下の `undici` / `form-data` / `linkify-it` / `js-yaml` / `markdown-it` を overrides で一括対応）。`pnpm audit --audit-level moderate` を 0 件に維持
+
 ## [0.8.2] - 2026-05-04
 
 ### Changed
@@ -231,6 +249,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[0.9.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.2...v0.9.0
 [0.8.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.0...v0.8.1
 [0.8.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.7.5...v0.8.0
