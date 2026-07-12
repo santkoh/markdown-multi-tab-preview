@@ -172,9 +172,9 @@
   },
   "dependencies": {
     "@panzoom/panzoom": "^4.6.2",
-    "dompurify": "^3.4.11",
+    "dompurify": "^3.4.12",
     "highlight.js": "^11.11.1",
     "marked": "^17.0.6",
-    "mermaid": "^11.15.0"
+    "mermaid": "^11.16.0"
   }
 }
