@@ -162,10 +162,10 @@
   },
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
-    "@types/node": "^25.9.2",
-    "@types/vscode": "^1.118.0",
+    "@types/node": "^25.9.5",
+    "@types/vscode": "^1.125.0",
     "@vscode/vsce": "^3.9.2",
-    "esbuild": "^0.28.1",
+    "esbuild": "^0.28.2",
     "npm-run-all2": "^8.0.4",
     "ovsx": "^0.10.12",
     "typescript": "^5.9.3"
