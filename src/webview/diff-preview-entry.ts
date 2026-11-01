@@ -1,4 +1,4 @@
-import DOMPurify from 'dompurify';
+import DOMPurify, { type Config } from 'dompurify';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: unknown): void;
@@ -9,7 +9,7 @@ const vscode = acquireVsCodeApi();
 const basePane = document.getElementById('base-content') as HTMLElement;
 const currentPane = document.getElementById('current-content') as HTMLElement;
 
-const DOMPUR_OPTIONS: DOMPurify.Config = {
+const DOMPUR_OPTIONS: Config = {
   FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
   FORBID_ATTR: ['style'],
 };

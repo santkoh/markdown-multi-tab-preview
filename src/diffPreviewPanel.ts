@@ -40,6 +40,7 @@ export class DiffPreviewPanel {
       `Diff: ${fileName}`,
       viewColumn,
       {
+        enableFindWidget: true,
         enableScripts: true,
         retainContextWhenHidden: true,
         localResourceRoots,

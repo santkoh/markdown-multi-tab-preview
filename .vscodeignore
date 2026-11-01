@@ -2,6 +2,11 @@ src/**
 docs/**
 .vscode/**
 .claude/**
+.agents/**
+.dev-notes/**
+.github/**
+test-files/**
+media/diagram-editor.js
 tsconfig.json
 tsconfig.webview.json
 esbuild.js

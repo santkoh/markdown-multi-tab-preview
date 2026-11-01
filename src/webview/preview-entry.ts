@@ -536,7 +536,7 @@ function buildToc(headings: TocHeading[], maxDepth: number): boolean {
   let rafId = 0;
   let tocScrollTimer: ReturnType<typeof setTimeout> | undefined;
 
-  function updateTocHighlight(): void {
+  const updateTocHighlight = (): void => {
     if (!content) return;
     const headingEls = content.querySelectorAll<HTMLElement>(headingSelector);
     let activeLine: string | null = null;
@@ -573,7 +573,7 @@ function buildToc(headings: TocHeading[], maxDepth: number): boolean {
         }
       }, 100);
     }
-  }
+  };
 
   function onScroll(): void {
     cancelAnimationFrame(rafId);
