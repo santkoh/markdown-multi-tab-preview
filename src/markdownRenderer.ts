@@ -1,4 +1,4 @@
-import { Marked, Tokens } from 'marked';
+import { Marked, Tokens, Token } from 'marked';
 import * as vscode from 'vscode';
 import { escapeHtml, slugify } from './utils';
 
@@ -40,7 +40,7 @@ export interface TocHeading {
   line: number;   // source line number
 }
 
-function extractPlainText(tokens: Tokens.Token[]): string {
+function extractPlainText(tokens: Token[]): string {
   return tokens.map(token => {
     if ('tokens' in token && Array.isArray(token.tokens)) {
       return extractPlainText(token.tokens);

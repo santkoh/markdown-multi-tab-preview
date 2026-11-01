@@ -74,6 +74,7 @@ export class PreviewPanel {
       `Preview: ${fileName}`,
       viewColumn,
       {
+        enableFindWidget: true,
         enableScripts: true,
         retainContextWhenHidden: retainContext,
         localResourceRoots,
