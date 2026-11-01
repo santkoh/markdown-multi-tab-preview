@@ -20,7 +20,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Changed
 
-- CI に拡張本体と Webview の型チェックを追加
+- CI に拡張本体と Webview の型チェックを追加し、既存の型エラーを修正
+- CodeQL を手動実行できるように対応
 - VS Code 型定義を 1.118.x に固定し、最低対応バージョン 1.118.0 と一致させた。英語・日本語 README の必要バージョンも修正
 - 開発用スキルとテスト用 Markdown を VSIX の同梱対象から除外
 
