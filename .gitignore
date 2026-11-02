@@ -5,3 +5,5 @@ media/*.js.map
 *.vsix
 .DS_Store
 .dev-notes/
+test-results/
+playwright-report/

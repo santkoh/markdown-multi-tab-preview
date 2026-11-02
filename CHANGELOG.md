@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Fixed
+
+- 通常プレビューと Rich Diff の検索に「現在位置 / 総ヒット数」を表示し、現在の一致箇所を強調表示と下線で区別できるように改善
+- 前後移動ボタン、0 件表示、文書更新時の再集計に対応し、プレビューのタイトルバーに検索アイコンを追加
+
 ## [0.10.0] - 2026-11-02
 
 ### Added

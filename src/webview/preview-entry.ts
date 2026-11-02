@@ -2,6 +2,7 @@ import mermaid from 'mermaid';
 import hljs from 'highlight.js';
 import DOMPurify from 'dompurify';
 import Panzoom from '@panzoom/panzoom';
+import { PreviewFind } from './find';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: unknown): void;
@@ -620,6 +621,7 @@ function escapeForHtml(text: string): string {
 }
 
 const content = document.getElementById('content');
+const previewFind = new PreviewFind(content ? [content] : []);
 
 // Handle link clicks in preview content
 content?.addEventListener('click', (e: MouseEvent) => {
@@ -763,6 +765,11 @@ window.addEventListener('message', async (event) => {
         document.body.classList.remove('toc-visible');
         document.body.classList.remove('toc-has-headings');
       }
+      previewFind.refresh();
+      break;
+    }
+    case 'find': {
+      previewFind.open();
       break;
     }
     case 'scroll': {

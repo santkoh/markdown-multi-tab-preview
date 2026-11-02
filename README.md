@@ -15,7 +15,7 @@ Preview multiple Markdown files simultaneously with independent preview panels. 
 - **Independent Preview Panels** — Each Markdown file opens in its own preview tab. Work with multiple documents side by side without interference.
 - **Auto Preview** — Automatically opens a preview panel when you open a `.md` or `.markdown` file. Can be disabled via settings.
 - **Real-time Update** — Preview updates as you type with debounced rendering (300ms).
-- **Find in Preview** — Search rendered text with `Ctrl+F` (Mac: `Cmd+F`) in both regular and Rich Diff previews.
+- **Find in Preview** — Search rendered text with `Ctrl+F` (Mac: `Cmd+F`), with a visible current-match / total counter in both regular and Rich Diff previews.
 - **Bidirectional Scroll Sync** — Editor and preview scroll positions stay in sync in both directions.
 - **Mermaid Diagrams** — Renders `mermaid` code blocks as diagrams with pan/zoom controls. Theme follows your VS Code color theme.
 - **Syntax Highlighting** — Code blocks are highlighted with [highlight.js](https://highlightjs.org/) and include a copy-to-clipboard button on hover.
@@ -78,7 +78,9 @@ Click the edit icon in the preview panel's title bar, or use the Command Palette
 
 ### Find in Preview
 
-Click inside a preview panel and press `Ctrl+F` (Mac: `Cmd+F`) to open VS Code's find widget. Search rendered text, move between matches with `Enter` / `Shift+Enter`, and press `Escape` to close. This also works in Rich Diff previews.
+Click inside a preview panel and press `Ctrl+F` (Mac: `Cmd+F`), or click the search icon in the panel title bar. The search bar shows **current match / total matches** (for example, `3 / 12`); the current match is highlighted and underlined. Move between matches with `Enter` / `Shift+Enter` or the arrow buttons, and press `Escape` to close. No matches displays `0 / 0`.
+
+Search is case-insensitive and treats the query as literal text. In Rich Diff previews, the counter covers both panes, starting with HEAD and then Working Tree. Counts refresh when the document changes; repeated headings in the Outline sidebar are excluded.
 
 ## Settings
 

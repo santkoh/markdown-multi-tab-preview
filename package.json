@@ -30,7 +30,8 @@
     "compile": "node esbuild.js",
     "watch": "node esbuild.js --watch",
     "package": "vsce package --no-dependencies",
-    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json"
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.webview.json",
+    "test": "pnpm run compile && playwright test"
   },
   "contributes": {
     "commands": [
@@ -52,6 +53,11 @@
         "command": "mdMultiTabPreview.showDiffPreview",
         "title": "Markdown Multi Tab Preview: Show Rich Diff (vs HEAD)",
         "icon": "$(git-compare)"
+      },
+      {
+        "command": "mdMultiTabPreview.findInPreview",
+        "title": "Markdown Multi Tab Preview: Find in Preview",
+        "icon": "$(search)"
       }
     ],
     "keybindings": [
@@ -60,6 +66,12 @@
         "key": "ctrl+shift+v",
         "mac": "cmd+shift+v",
         "when": "editorLangId == markdown || resourceExtname == .md || resourceExtname == .markdown || activeWebviewPanelId == mdMultiTabPreview"
+      },
+      {
+        "command": "mdMultiTabPreview.findInPreview",
+        "key": "ctrl+f",
+        "mac": "cmd+f",
+        "when": "activeWebviewPanelId == mdMultiTabPreview || activeWebviewPanelId == mdMultiTabDiffPreview"
       }
     ],
     "menus": {
@@ -78,6 +90,17 @@
           "command": "mdMultiTabPreview.showDiffPreview",
           "when": "editorLangId == markdown || resourceExtname == .md || resourceExtname == .markdown",
           "group": "navigation"
+        },
+        {
+          "command": "mdMultiTabPreview.findInPreview",
+          "when": "activeWebviewPanelId == mdMultiTabPreview || activeWebviewPanelId == mdMultiTabDiffPreview",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "mdMultiTabPreview.findInPreview",
+          "when": "activeWebviewPanelId == mdMultiTabPreview || activeWebviewPanelId == mdMultiTabDiffPreview"
         }
       ]
     },
@@ -148,6 +171,7 @@
   },
   "packageManager": "pnpm@10.29.3",
   "devDependencies": {
+    "@playwright/test": "^1.64.1",
     "@types/node": "^25.9.9",
     "@types/vscode": "~1.118.0",
     "@vscode/vsce": "^4.0.0",

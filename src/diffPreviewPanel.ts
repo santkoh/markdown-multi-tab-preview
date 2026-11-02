@@ -14,6 +14,12 @@ export class DiffPreviewPanel {
   private isDisposed = false;
   private refreshTimer: ReturnType<typeof setTimeout> | undefined;
   private readonly disposables: vscode.Disposable[] = [];
+  private readonly onDisposeEmitter = new vscode.EventEmitter<void>();
+  public readonly onDispose = this.onDisposeEmitter.event;
+
+  public get active(): boolean {
+    return !this.isDisposed && this.panel.active;
+  }
 
   constructor(
     document: vscode.TextDocument,
@@ -40,7 +46,6 @@ export class DiffPreviewPanel {
       `Diff: ${fileName}`,
       viewColumn,
       {
-        enableFindWidget: true,
         enableScripts: true,
         retainContextWhenHidden: true,
         localResourceRoots,
@@ -76,9 +81,15 @@ export class DiffPreviewPanel {
     this.panel.dispose();
   }
 
+  public find(): void {
+    void this.panel.webview.postMessage({ type: 'find' });
+  }
+
   private cleanUp(): void {
     if (this.isDisposed) return;
     this.isDisposed = true;
+    this.onDisposeEmitter.fire();
+    this.onDisposeEmitter.dispose();
     if (this.refreshTimer) clearTimeout(this.refreshTimer);
     for (const d of this.disposables) d.dispose();
     this.disposables.length = 0;
@@ -142,6 +153,7 @@ export class DiffPreviewPanel {
     const mediaUri = vscode.Uri.joinPath(this.extensionUri, 'media');
     const previewCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'preview.css'));
     const diffCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'diff-preview.css'));
+    const findCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'find.css'));
     const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'diff-preview.js'));
     const csp = webview.cspSource;
     const allowRemote = vscode.workspace
@@ -158,6 +170,7 @@ export class DiffPreviewPanel {
     content="default-src 'none'; img-src ${imgSrc}; script-src 'nonce-${nonce}'; style-src ${csp} 'unsafe-inline'; font-src ${csp};">
   <link rel="stylesheet" href="${previewCssUri}">
   <link rel="stylesheet" href="${diffCssUri}">
+  <link rel="stylesheet" href="${findCssUri}">
   <title>Diff Preview</title>
 </head>
 <body>

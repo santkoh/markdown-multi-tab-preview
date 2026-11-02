@@ -6,6 +6,10 @@ docs/**
 .dev-notes/**
 .github/**
 test-files/**
+tests/**
+test-results/**
+playwright-report/**
+playwright.config.ts
 media/diagram-editor.js
 tsconfig.json
 tsconfig.webview.json

@@ -14,6 +14,7 @@ function isMarkdownFile(document: vscode.TextDocument): boolean {
 /** Activate the extension: register commands, listeners, and auto-preview. */
 export function activate(context: vscode.ExtensionContext): void {
   previewManager = new PreviewManager(context.extensionUri, context.workspaceState);
+  const diffPanels = new Set<DiffPreviewPanel>();
 
   // Track documents that already had auto-preview opened
   const autoOpened = new Set<string>();
@@ -75,7 +76,18 @@ export function activate(context: vscode.ExtensionContext): void {
         vscode.ViewColumn.Beside,
         repo,
       );
+      diffPanels.add(diffPanel);
+      diffPanel.onDispose(() => diffPanels.delete(diffPanel));
       context.subscriptions.push({ dispose: () => diffPanel.dispose() });
+    })
+  );
+
+  context.subscriptions.push(
+    vscode.commands.registerCommand('mdMultiTabPreview.findInPreview', () => {
+      if (previewManager.findInActivePreview()) return;
+      for (const panel of diffPanels) {
+        if (panel.active) { panel.find(); return; }
+      }
     })
   );
 
