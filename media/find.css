@@ -1,0 +1,83 @@
+.preview-find {
+  position: fixed;
+  top: 6px;
+  right: 8px;
+  z-index: 1000;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  width: 420px;
+  max-width: calc(100vw - 16px);
+  padding: 6px;
+  color: var(--vscode-editorWidget-foreground, var(--vscode-editor-foreground));
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
+  border: 1px solid var(--vscode-widget-border, var(--vscode-panel-border, #808080));
+  border-radius: 4px;
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow, #0003);
+  font-family: var(--vscode-font-family, sans-serif);
+  font-size: 13px;
+  line-height: 24px;
+}
+
+.preview-find[hidden] { display: none; }
+
+.preview-find input {
+  box-sizing: border-box;
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 2px 6px;
+  color: var(--vscode-input-foreground, inherit);
+  background: var(--vscode-input-background, transparent);
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 2px;
+  font: inherit;
+  line-height: normal;
+}
+
+.preview-find input::placeholder { color: var(--vscode-input-placeholderForeground, inherit); }
+.preview-find input:focus { outline: 1px solid var(--vscode-focusBorder, #007acc); outline-offset: -1px; }
+
+.preview-find-count {
+  flex-shrink: 0;
+  min-width: 7ch;
+  padding: 0 3px;
+  text-align: center;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.preview-find button {
+  flex: 0 0 26px;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 3px;
+  color: inherit;
+  background: transparent;
+  font: inherit;
+  font-size: 18px;
+  line-height: 24px;
+  cursor: pointer;
+}
+
+.preview-find button:hover:not(:disabled) { background: var(--vscode-toolbar-hoverBackground, #80808033); }
+.preview-find button:focus-visible { outline: 1px solid var(--vscode-focusBorder, #007acc); }
+.preview-find button:disabled { opacity: 0.4; cursor: default; }
+
+/* Reserve room so matches at the start of a document stay below the search bar. */
+.find-open #content { padding-top: 44px; }
+.find-open .diff-container { padding-top: 44px; height: calc(100vh - 44px); }
+
+::highlight(mdmtp-find-matches) {
+  background-color: var(--vscode-editor-findMatchHighlightBackground, #ffdf5d80);
+  color: var(--vscode-editor-findMatchHighlightForeground, inherit);
+}
+
+::highlight(mdmtp-find-current) {
+  background-color: var(--vscode-editor-findMatchBackground, #ea9d43);
+  color: var(--vscode-editor-findMatchForeground, inherit);
+  text-decoration: underline;
+}

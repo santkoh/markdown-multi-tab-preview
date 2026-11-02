@@ -1,4 +1,5 @@
 import DOMPurify, { type Config } from 'dompurify';
+import { PreviewFind } from './find';
 
 declare function acquireVsCodeApi(): {
   postMessage(message: unknown): void;
@@ -8,6 +9,7 @@ const vscode = acquireVsCodeApi();
 
 const basePane = document.getElementById('base-content') as HTMLElement;
 const currentPane = document.getElementById('current-content') as HTMLElement;
+const previewFind = new PreviewFind([basePane, currentPane]);
 
 const DOMPUR_OPTIONS: Config = {
   FORBID_TAGS: ['style', 'form', 'input', 'textarea', 'select', 'button', 'object', 'embed', 'iframe'],
@@ -90,6 +92,11 @@ window.addEventListener('message', (event: MessageEvent) => {
     codeFontFamily?: string;
   };
 
+  if (msg.type === 'find') {
+    previewFind.open();
+    return;
+  }
+
   if (msg.type !== 'update') return;
 
   // Apply code font override; empty value falls back to the bundled CJK monospace in CSS.
@@ -121,6 +128,7 @@ window.addEventListener('message', (event: MessageEvent) => {
     banner.className = 'diff-no-changes';
     banner.textContent = 'No changes vs HEAD';
     currentPane.prepend(banner);
+    previewFind.refresh();
     return;
   }
 
@@ -130,6 +138,7 @@ window.addEventListener('message', (event: MessageEvent) => {
 
   applyDiffClasses(basePane, oldMap, 'removed');
   applyDiffClasses(currentPane, newMap, 'added');
+  previewFind.refresh();
 });
 
 // Notify extension that webview is ready.

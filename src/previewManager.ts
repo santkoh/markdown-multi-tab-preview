@@ -161,6 +161,16 @@ export class PreviewManager {
     return false;
   }
 
+  public findInActivePreview(): boolean {
+    for (const panel of this.panels.values()) {
+      if (panel.active) {
+        panel.find();
+        return true;
+      }
+    }
+    return false;
+  }
+
   public hasPreview(uri: vscode.Uri): boolean {
     return this.panels.has(uri.toString());
   }

@@ -74,7 +74,6 @@ export class PreviewPanel {
       `Preview: ${fileName}`,
       viewColumn,
       {
-        enableFindWidget: true,
         enableScripts: true,
         retainContextWhenHidden: retainContext,
         localResourceRoots,
@@ -170,6 +169,10 @@ export class PreviewPanel {
 
   public reveal(viewColumn?: vscode.ViewColumn): void {
     this.panel.reveal(viewColumn);
+  }
+
+  public find(): void {
+    void this.panel.webview.postMessage({ type: 'find' });
   }
 
   public dispose(): void {
@@ -293,6 +296,7 @@ export class PreviewPanel {
 
     const mediaUri = vscode.Uri.joinPath(this.extensionUri, 'media');
     const cssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'preview.css'));
+    const findCssUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'find.css'));
     const jsUri = webview.asWebviewUri(vscode.Uri.joinPath(mediaUri, 'preview.js'));
     const csp = webview.cspSource;
     const allowRemote = vscode.workspace
@@ -308,6 +312,7 @@ export class PreviewPanel {
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'none'; img-src ${imgSrc}; script-src 'nonce-${nonce}'; style-src ${csp} 'unsafe-inline'; font-src ${csp};">
   <link rel="stylesheet" href="${cssUri}">
+  <link rel="stylesheet" href="${findCssUri}">
   <title>Preview</title>
 </head>
 <body>
