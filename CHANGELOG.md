@@ -8,22 +8,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-11-02
+
 ### Added
 
-- 通常プレビューと Rich Diff で VS Code 標準の検索ウィジェットを有効化。`Ctrl+F`（Mac: `Cmd+F`）で表示中のテキストを検索できるようにした (#118)
+- 通常プレビューと Rich Diff でプレビュー内検索に対応。`Ctrl+F`（Mac: `Cmd+F`）で VS Code 標準の検索ウィジェットを開き、表示中のテキストを検索できるようにした (#118, #119)
 
 ### Security
 
-- DOMPurify を 3.4.17、Mermaid を 11.17.2 へ更新し、推移的依存の KaTeX も修正版へ更新
-- VSIX 作成・公開ツールを更新し、MSAL / minimatch を含む開発依存の脆弱性を解消。不要な `npm-run-all2` と古い overrides を整理し、`pnpm audit` の全深刻度で検出 0 件を確認 (#76)
-- GitHub Actions の checkout / setup-node / CodeQL を更新し、引き続きコミット SHA で固定
+- DOMPurify を 3.4.17、Mermaid を 11.17.2 へ更新し、推移的依存の KaTeX も修正版へ更新。開発依存を含めて既知の脆弱性を解消 (#76, #119)
 
 ### Changed
 
-- CI に拡張本体と Webview の型チェックを追加し、既存の型エラーを修正
-- CodeQL を手動実行できるように対応
-- VS Code 型定義を 1.118.x に固定し、最低対応バージョン 1.118.0 と一致させた。英語・日本語 README の必要バージョンも修正
-- 開発用スキルとテスト用 Markdown を VSIX の同梱対象から除外
+- highlight.js を 11.12.0 へ更新
+- 開発用ファイルと未使用の旧 JavaScript バンドルを VSIX の同梱対象から除外
+- 英語・日本語 README の必要 VS Code バージョンを、実際の最低対応バージョンである 1.118.0 に修正
 
 ## [0.9.0] - 2026-06-27
 
@@ -266,6 +265,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 - Sanitized all HTML output with DOMPurify to prevent XSS.
 
+[Unreleased]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.10.0...HEAD
+[0.10.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.9.0...v0.10.0
 [0.9.0]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.2...v0.9.0
 [0.8.2]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.1...v0.8.2
 [0.8.1]: https://github.com/santkoh/markdown-multi-tab-preview/compare/v0.8.0...v0.8.1
