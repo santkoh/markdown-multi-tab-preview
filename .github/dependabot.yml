@@ -25,5 +25,9 @@ updates:
       day: monday
       time: "00:00"
       timezone: Asia/Tokyo
+    groups:
+      codeql:
+        patterns:
+          - "github/codeql-action*"
     commit-message:
       prefix: "chore"
